@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>羅本家｜隔日待辦分配</title>
+<style>
+  :root{
+    --curry: #C97C2C;
+    --curry-dark: #A5621B;
+    --char: #2B2420;
+    --cream: #FBF5E9;
+    --card: #FFFFFF;
+    --line: #E8DDC8;
+    --herb: #5C7A4A;
+    --alert: #B8452F;
+    --muted: #8A7F6E;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  body{
+    margin:0; background:var(--cream); color:var(--char);
+    font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    padding-bottom: 140px;
+  }
+  header{
+    background: var(--char); color: var(--cream);
+    padding: 18px 16px 16px;
+    position: sticky; top:0; z-index: 10;
+  }
+  header h1{
+    font-size: 17px; margin:0 0 2px; font-weight: 700; letter-spacing: .5px;
+    display:flex; align-items:center; gap:6px;
+  }
+  header .sub{font-size:12px; color:#C9BFA8;}
+  .date-row{
+    display:flex; align-items:center; gap:10px; margin-top:12px;
+    background: rgba(255,255,255,0.08); border-radius: var(--radius); padding: 10px 12px;
+  }
+  .date-row label{font-size:12px; color:#D8CDB8; white-space:nowrap;}
+  .date-row input[type=date]{
+    flex:1; background:transparent; border:none; color:#fff; font-size:15px; font-weight:600;
+    -webkit-appearance:none;
+  }
+  .date-badge{
+    background: var(--curry); color:#fff; font-size:12px; font-weight:700;
+    padding: 4px 10px; border-radius: 20px; white-space:nowrap;
+  }
+  .toolbar-row{display:flex; gap:8px; margin-top:8px;}
+  .toolbar-btn{
+    flex:1; background: rgba(255,255,255,0.08); color:#fff; border:none; border-radius:10px;
+    padding: 9px 6px; font-size:12px; font-weight:700;
+  }
+  main{padding: 14px 12px;}
+  .section-title{
+    font-size: 13px; font-weight:700; color: var(--curry-dark);
+    margin: 18px 4px 8px; display:flex; align-items:center; gap:6px;
+  }
+  .staff-quick{
+    display:flex; flex-wrap:wrap; gap:8px; margin: 0 4px 10px;
+  }
+  .staff-chip-wrap{
+    display:flex; align-items:center; background:#fff; border:1.5px solid var(--line); border-radius: 20px;
+    overflow:hidden;
+  }
+  .staff-chip{
+    background:none; border:none;
+    padding: 8px 6px 8px 14px; font-size: 13px; color: var(--char); font-weight:600;
+  }
+  .staff-chip small{color:var(--muted); font-weight:400; margin-left:4px;}
+  .staff-edit-btn{
+    background:none; border:none; color:var(--muted); font-size:13px; padding: 8px 12px 8px 4px;
+    border-left: 1px solid var(--line);
+  }
+  .staff-edit-panel{
+    width:100%; background:#fff; border:1.5px solid var(--curry); border-radius: 12px;
+    padding: 10px; margin: -2px 4px 8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;
+  }
+  .staff-edit-panel .label{font-size:12px; color:var(--muted); width:100%; margin-bottom:2px; font-weight:600;}
+  .add-person-btn{
+    width:100%; border: 2px dashed var(--curry); background: rgba(201,124,44,0.07);
+    color: var(--curry-dark); font-weight:700; font-size:15px;
+    border-radius: var(--radius); padding: 13px; margin: 4px 4px 0;
+  }
+  /* person card */
+  .person-card{
+    background: var(--card); border-radius: var(--radius); margin: 0 4px 14px;
+    box-shadow: 0 1px 3px rgba(43,36,32,0.08); overflow:hidden;
+    border: 1px solid var(--line);
+  }
+  .person-head{
+    display:flex; align-items:center; gap:10px; padding: 13px 14px;
+    background: linear-gradient(135deg, #FFF7EA, #FFF);
+    border-bottom: 1px solid var(--line);
+  }
+  .person-avatar{
+    width:36px; height:36px; border-radius:50%; background: var(--curry);
+    color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .person-name-wrap{flex:1; min-width:0;}
+  .person-name-wrap input{
+    font-size:15px; font-weight:700; border:none; background:transparent; width:100%; color:var(--char);
+    padding: 2px 0;
+  }
+  .role-row{display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;}
+  .role-tag{
+    font-size:11px; padding:3px 9px; border-radius: 20px; border:1px solid var(--line);
+    background:#fff; color:var(--muted); font-weight:600;
+  }
+  .role-tag.active{background: var(--herb); color:#fff; border-color:var(--herb);}
+  .remove-person{
+    background:none; border:none; color:var(--muted); font-size: 20px; padding: 4px 6px; line-height:1;
+  }
+  .item-groups{padding: 10px 12px 4px;}
+  .cat-block{margin-bottom: 8px; border-radius: 10px; overflow:hidden;}
+  .cat-toggle{
+    width:100%; display:flex; justify-content:space-between; align-items:center;
+    background: #FAF4E6; border:none; padding: 10px 10px; font-size:13px; font-weight:700;
+    color: var(--curry-dark); border-radius:10px;
+  }
+  .cat-toggle .count{
+    font-size:11px; background:var(--curry); color:#fff; border-radius:10px; padding:1px 8px; margin-left:6px;
+  }
+  .cat-toggle .count.has-important{background: var(--alert);}
+  .cat-toggle .chevron{transition: transform .15s; color:var(--muted); font-size:12px;}
+  .cat-toggle.open .chevron{transform: rotate(180deg);}
+  .cat-items{
+    display:none; padding: 8px 4px 4px; flex-wrap:wrap; gap:8px; flex-direction:row;
+  }
+  .cat-items.open{display:flex;}
+  .chip-group{
+    display:inline-flex; align-items:stretch; border:1.5px solid var(--line); border-radius: 20px;
+    overflow:hidden; background:#fff;
+  }
+  .chip-group.on{border-color: var(--curry);}
+  .chip-group.important{border-color: var(--alert);}
+  .chip-main{
+    border:none; background:transparent; padding: 8px 13px; font-size: 13px; color: var(--char); font-weight:500;
+  }
+  .chip-group.on .chip-main{background: var(--curry); color:#fff; font-weight:700;}
+  .chip-important{
+    border:none; background:#fff; padding: 8px 9px; font-size:12px; color:var(--muted); border-left:1px solid var(--line);
+  }
+  .chip-important.active{background: var(--alert); color:#fff;}
+  .amount-item-row{
+    flex-basis:100%; display:flex; align-items:stretch; gap:8px; margin: 2px 0;
+  }
+  .amount-input{
+    flex:1; border:1px solid var(--line); border-radius:10px; padding:7px 10px; font-size:13px; background:#FBFAF6;
+    min-width:0;
+  }
+  .custom-item-row{display:flex; gap:6px; padding: 6px 12px 12px;}
+  .cat-items .custom-item-row{flex-basis:100%; padding: 4px 4px 2px; margin-top:2px;}
+  .custom-item-row input{
+    flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 10px; font-size:13px; background:#FBFAF6;
+  }
+  .custom-item-row button{
+    background: var(--char); color:#fff; border:none; border-radius:10px; padding: 0 16px; font-weight:700; font-size:13px;
+  }
+  .custom-tags{padding: 0 12px 4px; display:flex; flex-wrap:wrap; gap:6px;}
+  .custom-tag{
+    background: rgba(184,69,47,0.09); color: var(--char); border-radius:20px; font-size:12px;
+    padding:0; display:flex; align-items:stretch; overflow:hidden; font-weight:600;
+    border: 1px solid var(--line);
+  }
+  .custom-tag .ctag-text{padding:6px 4px 6px 12px; background:none; border:none; color:inherit; font-size:12px; font-weight:600;}
+  .custom-tag.important{border-color: var(--alert);}
+  .custom-tag.important .ctag-text{background: var(--alert); color:#fff;}
+  .custom-tag .ctag-remove{background:none; border:none; color:var(--muted); font-size:14px; padding:6px 10px 6px 6px; line-height:1;}
+  .note-wrap{padding: 4px 12px 14px;}
+  .note-wrap textarea{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding: 9px 10px;
+    font-size:13px; font-family:inherit; resize:vertical; min-height:44px; background:#FBFAF6;
+  }
+  .note-label{font-size:11px; color:var(--muted); margin-bottom:4px; display:block; font-weight:600;}
+
+  .global-note{
+    background:#fff; border-radius: var(--radius); margin:0 4px; padding: 12px 14px;
+    border: 1px solid var(--line);
+  }
+  .global-note textarea{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:14px;
+    font-family:inherit; min-height:70px; background:#FBFAF6; margin-top:6px;
+  }
+  .filler-row{
+    display:flex; align-items:center; gap:10px; margin: 14px 4px 0; background:#fff;
+    border-radius: var(--radius); padding: 12px 14px; border:1px solid var(--line);
+  }
+  .filler-row label{font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap;}
+  .filler-row input{flex:1; border:none; font-size:14px; font-weight:700; background:transparent; color:var(--char);}
+
+  .empty-hint{
+    text-align:center; color:var(--muted); font-size:13px; padding: 30px 20px;
+    background:#fff; border-radius: var(--radius); margin: 0 4px; border:1px dashed var(--line);
+  }
+
+  footer{
+    position: fixed; bottom:0; left:0; right:0; background:#fff;
+    border-top:1px solid var(--line); padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex; gap:10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  }
+  footer button{
+    flex:1; border:none; border-radius: 12px; padding: 14px; font-size:15px; font-weight:700;
+  }
+  .btn-preview{background:#F1E9D8; color: var(--char);}
+  .btn-copy{background: var(--curry); color:#fff;}
+  .btn-copy.copied{background: var(--herb);}
+
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(43,36,32,0.5); z-index:50;
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-bg.show{display:flex;}
+  .modal{
+    background:#fff; width:100%; max-width:480px; border-radius: 20px 20px 0 0;
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); max-height:80vh; overflow-y:auto;
+  }
+  .modal h3{margin:0 0 12px; font-size:16px;}
+  .modal pre{
+    white-space:pre-wrap; word-break:break-word; font-family: inherit; font-size:13.5px;
+    line-height:1.6; background:#FBF5E9; border-radius:10px; padding:12px; border:1px solid var(--line);
+  }
+  .modal-close{
+    display:block; width:100%; margin-top:12px; background:var(--char); color:#fff;
+    border:none; border-radius:12px; padding:12px; font-weight:700;
+  }
+  .history-item{
+    display:block; width:100%; text-align:left; background:#FBF5E9; border:1px solid var(--line);
+    border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px; font-weight:600; color:var(--char);
+  }
+  .history-item .hdate{color:var(--curry-dark); font-weight:700; margin-right:6px;}
+  .history-empty{color:var(--muted); font-size:13px; text-align:center; padding:20px;}
+  .history-back{
+    background:none; border:none; color:var(--curry-dark); font-weight:700; font-size:13px; padding:4px 0 10px;
+  }
+  .history-copy-btn{background: var(--curry) !important;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍛 羅本家｜隔日待辦分配</h1>
+  <div class="sub">點一點分配工作，完成後複製貼到 LINE 群組</div>
+  <div class="date-row">
+    <label>日期</label>
+    <input type="date" id="dateInput">
+    <span class="date-badge" id="dateBadge"></span>
+  </div>
+  <div class="toolbar-row">
+    <button class="toolbar-btn" id="historyBtn">📜 歷史記錄</button>
+    <button class="toolbar-btn" id="clearBtn">🗑 清除本頁資料</button>
+  </div>
+</header>
+
+<main>
+  <div class="section-title">👥 常用人員（點一下快速加入，✎ 可改職稱）</div>
+  <div class="staff-quick" id="staffQuick"></div>
+  <button class="add-person-btn" id="addPersonBtn">＋ 新增人員</button>
+
+  <div id="personList" style="margin-top:14px;"></div>
+  <div class="empty-hint" id="emptyHint">還沒有分配任何人員，點上方「＋新增人員」開始</div>
+
+  <div class="section-title">📝 整體特別注意事項</div>
+  <div class="global-note">
+    <span class="note-label">給全體人員的提醒（例：明日雨天、企業訂單加量等）</span>
+    <textarea id="globalNote" placeholder="輸入整體注意事項..."></textarea>
+  </div>
+
+  <div class="filler-row">
+    <label>填表人</label>
+    <input type="text" id="fillerName" value="羅季安">
+  </div>
+</main>
+
+<footer>
+  <button class="btn-preview" id="previewBtn">預覽</button>
+  <button class="btn-copy" id="copyBtn">📋 複製到 LINE</button>
+</footer>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>預覽內容</h3>
+    <pre id="previewText"></pre>
+    <button class="modal-close" id="modalClose">關閉</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="historyModalBg">
+  <div class="modal">
+    <h3>歷史記錄</h3>
+    <div id="historyListWrap"></div>
+    <div id="historyDetailWrap" style="display:none;">
+      <button class="history-back" id="historyBackBtn">← 返回列表</button>
+      <pre id="historyDetailText"></pre>
+      <button class="modal-close history-copy-btn" id="historyCopyBtn">複製此則</button>
+    </div>
+    <button class="modal-close" id="historyCloseBtn">關閉</button>
+  </div>
+</div>
+
+<script>
+const ROLES = ["內場廚師","內場廚助","PT廚助","PT外場","外場正職"];
+let KNOWN_STAFF = [
+  {name:"謝宛廷", role:"內場廚師"},
+  {name:"羅湘", role:"外場正職"},
+  {name:"黃少甫", role:"PT廚助"}
+];
+
+const CATEGORIES = [
+  {name:"內場備料", icon:"🍲", items:[
+      "辣油","洋蔥絲","日式醬","南洋醬",
+      {name:"醃製雞腿肉", hasAmount:true, placeholder:"公斤數，例如 12"},
+      "分裝雪花牛",
+      {name:"雞腿肉抓粉", hasAmount:true, placeholder:"公斤數，例如 3"},
+      "煮羅宋湯","蒜泥","薑泥","分切四季田園"
+    ], manualInput:true, manualPlaceholder:"輸入內場備料項目...", extra:[]},
+  {name:"外場備料", icon:"🥤", items:["冬瓜茶","冬瓜檸檬","紅茶","胡麻醬"], manualInput:true, manualPlaceholder:"輸入外場備料項目...", extra:[]},
+  {name:"企業午餐", icon:"🏢", items:["訂單確認","key單","初茶弁飯(10:50取餐)","樂點外送","偷訂(10:30取餐)","Lalamove預約"]},
+  {name:"叫貨", icon:"📦", items:["雞蛋","豬肉","雞肉","牛肉","美食家","外帶盒"]},
+  {name:"臨時採購", icon:"🛒", items:[], manualInput:true, manualPlaceholder:"輸入臨時採購項目...", extra:[]},
+  {name:"清潔", icon:"🧹", items:["冰箱清潔","工作台大掃除","油煙罩","油炸鍋"], manualInput:true, manualPlaceholder:"其他清潔項目...", extra:[]},
+  {name:"庫存盤點", icon:"📋", items:["庫存盤點"]}
+];
+
+let people = [];
+let idCounter = 0;
+let editingStaffIdx = null;
+
+function pad(n){return n<10?"0"+n:n;}
+function toISO(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function defaultTomorrow(){ const d = new Date(); d.setDate(d.getDate()+1); return d; }
+
+const dateInput = document.getElementById('dateInput');
+const dateBadge = document.getElementById('dateBadge');
+dateInput.value = toISO(defaultTomorrow());
+
+function updateDateBadge(){
+  const [y,m,d] = dateInput.value.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  const weekdays = ["日","一","二","三","四","五","六"];
+  dateBadge.textContent = (m)+"/"+d+" (週"+weekdays[dt.getDay()]+")";
+}
+dateInput.addEventListener('change', updateDateBadge);
+updateDateBadge();
+
+// ---- persistence helpers ----
+// 優先使用 Claude 環境的 window.storage；若不存在（例如部署到 GitHub Pages），
+// 自動改用瀏覽器的 localStorage（僅該手機/該瀏覽器本機有效，不會跨裝置同步）。
+async function storageGetRaw(key){
+  try{
+    if(window.storage && typeof window.storage.get === 'function'){
+      const res = await window.storage.get(key, false);
+      return res ? res.value : null;
+    }
+  }catch(e){}
+  try{ return localStorage.getItem(key); }catch(e){}
+  return null;
+}
+async function storageSetRaw(key, value){
+  try{
+    if(window.storage && typeof window.storage.set === 'function'){
+      await window.storage.set(key, value, false);
+      return;
+    }
+  }catch(e){}
+  try{ localStorage.setItem(key, value); }catch(e){}
+}
+async function loadJSON(key, fallback){
+  try{
+    const raw = await storageGetRaw(key);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return fallback;
+}
+async function saveJSON(key, value){
+  try{ await storageSetRaw(key, JSON.stringify(value)); }catch(e){}
+}
+
+async function saveKnownStaff(){ await saveJSON('loben-known-staff', KNOWN_STAFF); }
+
+function syncPersonToKnownStaff(p, opts){
+  const nm = (p.name || '').trim();
+  if(!nm) return;
+  const existing = KNOWN_STAFF.find(s=>s.name===nm);
+  if(!existing){
+    KNOWN_STAFF.push({name:nm, role:p.role});
+    saveKnownStaff();
+    renderStaffQuick();
+  } else if(opts && opts.updateRole && existing.role !== p.role){
+    existing.role = p.role;
+    saveKnownStaff();
+    renderStaffQuick();
+  }
+}
+
+function renderStaffQuick(){
+  const staffQuick = document.getElementById('staffQuick');
+  staffQuick.innerHTML = '';
+  KNOWN_STAFF.forEach((s, idx)=>{
+    if(editingStaffIdx === idx){
+      const panel = document.createElement('div');
+      panel.className = 'staff-edit-panel';
+      const label = document.createElement('div');
+      label.className = 'label';
+      label.textContent = s.name + ' — 選擇職稱';
+      panel.appendChild(label);
+      ROLES.forEach(r=>{
+        const tag = document.createElement('button');
+        tag.className = 'role-tag' + (s.role===r ? ' active':'');
+        tag.textContent = r;
+        tag.onclick = async ()=>{
+          s.role = r;
+          editingStaffIdx = null;
+          await saveKnownStaff();
+          renderStaffQuick();
+        };
+        panel.appendChild(tag);
+      });
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'role-tag';
+      doneBtn.textContent = '取消';
+      doneBtn.onclick = ()=>{ editingStaffIdx = null; renderStaffQuick(); };
+      panel.appendChild(doneBtn);
+      staffQuick.appendChild(panel);
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.className = 'staff-chip-wrap';
+    const chip = document.createElement('button');
+    chip.className = 'staff-chip';
+    chip.innerHTML = s.name + '<small>'+s.role+'</small>';
+    chip.onclick = ()=> addPerson(s.name, s.role);
+    const editBtn = document.createElement('button');
+    editBtn.className = 'staff-edit-btn';
+    editBtn.textContent = '✎';
+    editBtn.onclick = ()=>{ editingStaffIdx = idx; renderStaffQuick(); };
+    wrap.appendChild(chip);
+    wrap.appendChild(editBtn);
+    staffQuick.appendChild(wrap);
+  });
+}
+
+(async ()=>{
+  const savedStaff = await loadJSON('loben-known-staff', null);
+  if(Array.isArray(savedStaff) && savedStaff.length) KNOWN_STAFF = savedStaff;
+
+  for(const cat of CATEGORIES){
+    if(cat.manualInput){
+      const extra = await loadJSON('loben-extra::'+cat.name, []);
+      if(Array.isArray(extra)) cat.extra = extra;
+    }
+  }
+  renderStaffQuick();
+  render();
+})();
+
+function addPerson(name, role){
+  const p = {
+    id: 'p'+(idCounter++),
+    name: name || '',
+    role: role || ROLES[0],
+    checked: new Set(),
+    amounts: {},
+    important: new Set(),
+    customItems: [],
+    note: ''
+  };
+  people.push(p);
+  if(name) syncPersonToKnownStaff(p, {updateRole:false});
+  render();
+}
+
+document.getElementById('addPersonBtn').onclick = ()=> addPerson('', ROLES[0]);
+
+function removePerson(id){
+  people = people.filter(p=>p.id!==id);
+  render();
+}
+
+function itemLabel(it){ return typeof it === 'object' ? it.name : it; }
+
+function toggleImportant(p, label){
+  if(p.important.has(label)) p.important.delete(label);
+  else p.important.add(label);
+  render();
+}
+
+function render(){
+  const list = document.getElementById('personList');
+  const emptyHint = document.getElementById('emptyHint');
+  list.innerHTML = '';
+  emptyHint.style.display = people.length ? 'none' : 'block';
+
+  people.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'person-card';
+
+    // head
+    const head = document.createElement('div');
+    head.className = 'person-head';
+    const avatar = document.createElement('div');
+    avatar.className = 'person-avatar';
+    avatar.textContent = (p.name || '？').slice(0,1);
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'person-name-wrap';
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = '輸入姓名';
+    nameInput.value = p.name;
+    nameInput.oninput = (e)=>{ p.name = e.target.value; avatar.textContent = (p.name||'？').slice(0,1); };
+    nameInput.onblur = ()=>{ syncPersonToKnownStaff(p, {updateRole:false}); };
+    const roleRow = document.createElement('div');
+    roleRow.className = 'role-row';
+    ROLES.forEach(r=>{
+      const tag = document.createElement('button');
+      tag.className = 'role-tag' + (p.role===r ? ' active':'');
+      tag.textContent = r;
+      tag.onclick = ()=>{ p.role = r; syncPersonToKnownStaff(p, {updateRole:true}); render(); };
+      roleRow.appendChild(tag);
+    });
+    nameWrap.appendChild(nameInput);
+    nameWrap.appendChild(roleRow);
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-person';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = ()=> removePerson(p.id);
+    head.appendChild(avatar);
+    head.appendChild(nameWrap);
+    head.appendChild(removeBtn);
+    card.appendChild(head);
+
+    // item groups
+    const groups = document.createElement('div');
+    groups.className = 'item-groups';
+    CATEGORIES.forEach(cat=>{
+      const block = document.createElement('div');
+      block.className = 'cat-block';
+      const allEntries = cat.items.concat(cat.extra || []);
+      const checkedCount = allEntries.filter(it=>p.checked.has(itemLabel(it))).length;
+      const importantInCat = allEntries.some(it=>p.checked.has(itemLabel(it)) && p.important.has(itemLabel(it)));
+      const toggle = document.createElement('button');
+      toggle.className = 'cat-toggle';
+      toggle.innerHTML = '<span>'+cat.icon+' '+cat.name + (checkedCount? '<span class="count'+(importantInCat?' has-important':'')+'">'+checkedCount+'</span>':'') +'</span><span class="chevron">▾</span>';
+      const itemsWrap = document.createElement('div');
+      itemsWrap.className = 'cat-items';
+
+      allEntries.forEach(it=>{
+        if(typeof it === 'object' && it.hasAmount){
+          const label = it.name;
+          const isOn = p.checked.has(label);
+          const isImp = p.important.has(label);
+          const row = document.createElement('div');
+          row.className = 'amount-item-row';
+
+          const group = document.createElement('div');
+          group.className = 'chip-group' + (isOn?' on':'') + (isImp?' important':'');
+          const mainBtn = document.createElement('button');
+          mainBtn.className = 'chip-main';
+          mainBtn.textContent = label;
+          mainBtn.onclick = ()=>{
+            if(p.checked.has(label)){ p.checked.delete(label); delete p.amounts[label]; p.important.delete(label); }
+            else { p.checked.add(label); }
+            render();
+          };
+          group.appendChild(mainBtn);
+          if(isOn){
+            const impBtn = document.createElement('button');
+            impBtn.className = 'chip-important' + (isImp?' active':'');
+            impBtn.textContent = '❗';
+            impBtn.onclick = (e)=>{ e.stopPropagation(); toggleImportant(p, label); };
+            group.appendChild(impBtn);
+          }
+
+          const amtInput = document.createElement('input');
+          amtInput.type = 'text';
+          amtInput.className = 'amount-input';
+          amtInput.placeholder = it.placeholder || '填寫數量';
+          amtInput.value = p.amounts[label] || '';
+          amtInput.oninput = (e)=>{
+            p.amounts[label] = e.target.value;
+            if(!p.checked.has(label)) p.checked.add(label);
+          };
+          row.appendChild(group);
+          row.appendChild(amtInput);
+          itemsWrap.appendChild(row);
+        } else {
+          const label = itemLabel(it);
+          const isOn = p.checked.has(label);
+          const isImp = p.important.has(label);
+          const group = document.createElement('div');
+          group.className = 'chip-group' + (isOn?' on':'') + (isImp?' important':'');
+          const mainBtn = document.createElement('button');
+          mainBtn.className = 'chip-main';
+          mainBtn.textContent = label;
+          mainBtn.onclick = ()=>{
+            if(p.checked.has(label)){ p.checked.delete(label); p.important.delete(label); }
+            else { p.checked.add(label); }
+            render();
+          };
+          group.appendChild(mainBtn);
+          if(isOn){
+            const impBtn = document.createElement('button');
+            impBtn.className = 'chip-important' + (isImp?' active':'');
+            impBtn.textContent = '❗';
+            impBtn.onclick = (e)=>{ e.stopPropagation(); toggleImportant(p, label); };
+            group.appendChild(impBtn);
+          }
+          itemsWrap.appendChild(group);
+        }
+      });
+
+      if(cat.manualInput){
+        const manualRow = document.createElement('div');
+        manualRow.className = 'custom-item-row';
+        const mInput = document.createElement('input');
+        mInput.placeholder = cat.manualPlaceholder || '輸入項目...';
+        const mBtn = document.createElement('button');
+        mBtn.textContent = '加入';
+        const addManual = async ()=>{
+          const v = mInput.value.trim();
+          if(!v) return;
+          p.checked.add(v);
+          const exists = cat.items.some(x=>itemLabel(x)===v) || (cat.extra||[]).includes(v);
+          if(!exists){
+            cat.extra = cat.extra || [];
+            cat.extra.push(v);
+            await saveJSON('loben-extra::'+cat.name, cat.extra);
+          }
+          mInput.value = '';
+          render();
+        };
+        mBtn.onclick = addManual;
+        mInput.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addManual(); } };
+        manualRow.appendChild(mInput);
+        manualRow.appendChild(mBtn);
+        itemsWrap.appendChild(manualRow);
+      }
+
+      toggle.onclick = ()=>{
+        toggle.classList.toggle('open');
+        itemsWrap.classList.toggle('open');
+      };
+      block.appendChild(toggle);
+      block.appendChild(itemsWrap);
+      groups.appendChild(block);
+    });
+    card.appendChild(groups);
+
+    // custom items tags (general, not tied to a category)
+    if(p.customItems.length){
+      const tagsWrap = document.createElement('div');
+      tagsWrap.className = 'custom-tags';
+      p.customItems.forEach((ci, idx)=>{
+        const isImp = p.important.has(ci);
+        const tag = document.createElement('div');
+        tag.className = 'custom-tag' + (isImp ? ' important':'');
+        const textBtn = document.createElement('button');
+        textBtn.className = 'ctag-text';
+        textBtn.textContent = (isImp?'❗':'') + ci;
+        textBtn.onclick = ()=> toggleImportant(p, ci);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'ctag-remove';
+        removeBtn.textContent = '✕';
+        removeBtn.onclick = ()=>{ p.customItems.splice(idx,1); p.important.delete(ci); render(); };
+        tag.appendChild(textBtn);
+        tag.appendChild(removeBtn);
+        tagsWrap.appendChild(tag);
+      });
+      card.appendChild(tagsWrap);
+    }
+
+    // general custom item input
+    const customRow = document.createElement('div');
+    customRow.className = 'custom-item-row';
+    const customInput = document.createElement('input');
+    customInput.placeholder = '其他自訂臨時任務...';
+    const customBtn = document.createElement('button');
+    customBtn.textContent = '加入';
+    const addCustom = ()=>{
+      const v = customInput.value.trim();
+      if(v){ p.customItems.push(v); customInput.value=''; render(); }
+    };
+    customBtn.onclick = addCustom;
+    customInput.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addCustom(); } };
+    customRow.appendChild(customInput);
+    customRow.appendChild(customBtn);
+    card.appendChild(customRow);
+
+    // note
+    const noteWrap = document.createElement('div');
+    noteWrap.className = 'note-wrap';
+    const noteLabel = document.createElement('span');
+    noteLabel.className = 'note-label';
+    noteLabel.textContent = '給 ' + (p.name||'此人員') + ' 的特別注意事項';
+    const noteArea = document.createElement('textarea');
+    noteArea.placeholder = '輸入個人注意事項...';
+    noteArea.value = p.note;
+    noteArea.oninput = (e)=>{ p.note = e.target.value; };
+    noteWrap.appendChild(noteLabel);
+    noteWrap.appendChild(noteArea);
+    card.appendChild(noteWrap);
+
+    list.appendChild(card);
+  });
+}
+
+function formatItemForOutput(p, label){
+  if(p.amounts && p.amounts[label]){
+    return label + ' ' + p.amounts[label];
+  }
+  return label;
+}
+
+function buildPersonEntries(p){
+  const entries = [];
+  p.checked.forEach(label=>{
+    entries.push({ text: formatItemForOutput(p, label), important: p.important.has(label) });
+  });
+  p.customItems.forEach(ci=>{
+    entries.push({ text: ci, important: p.important.has(ci) });
+  });
+  entries.sort((a,b)=> (b.important?1:0) - (a.important?1:0));
+  return entries;
+}
+
+function buildOutput(){
+  const [y,m,d] = dateInput.value.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  const weekdays = ["日","一","二","三","四","五","六"];
+  const dateStr = m+"/"+d+"（週"+weekdays[dt.getDay()]+"）";
+
+  let lines = [];
+  lines.push('📅 ' + dateStr + ' 隔日工作分配');
+  lines.push('—');
+
+  if(people.length===0){
+    lines.push('（尚未分配人員）');
+  }
+
+  people.forEach((p, idx)=>{
+    const entries = buildPersonEntries(p);
+    lines.push('👤 ' + (p.name || '未命名') + '（' + p.role + '）');
+    if(entries.length===0){
+      lines.push('　（無指派項目）');
+    } else {
+      entries.forEach(e=> lines.push((e.important ? '🔴❗' : '☑️') + ' ' + e.text));
+    }
+    if(p.note && p.note.trim()){
+      lines.push('📝 備註：' + p.note.trim());
+    }
+    if(idx < people.length-1) lines.push('—');
+  });
+
+  const g = document.getElementById('globalNote').value.trim();
+  if(g){
+    lines.push('—');
+    lines.push('📌 整體注意事項：' + g);
+  }
+
+  lines.push('—');
+  lines.push('填表人：' + (document.getElementById('fillerName').value.trim() || ''));
+
+  return lines.join('\n');
+}
+
+document.getElementById('previewBtn').onclick = ()=>{
+  document.getElementById('previewText').textContent = buildOutput();
+  document.getElementById('modalBg').classList.add('show');
+};
+document.getElementById('modalClose').onclick = ()=>{
+  document.getElementById('modalBg').classList.remove('show');
+};
+document.getElementById('modalBg').onclick = (e)=>{
+  if(e.target.id==='modalBg') document.getElementById('modalBg').classList.remove('show');
+};
+
+async function saveHistoryEntry(){
+  const dateVal = dateInput.value;
+  const text = buildOutput();
+  let history = await loadJSON('loben-history', []);
+  if(!Array.isArray(history)) history = [];
+  history = history.filter(h=>h.date !== dateVal);
+  history.unshift({date: dateVal, text: text, savedAt: Date.now()});
+  if(history.length>60) history = history.slice(0,60);
+  await saveJSON('loben-history', history);
+}
+
+document.getElementById('copyBtn').onclick = async ()=>{
+  const text = buildOutput();
+  const btn = document.getElementById('copyBtn');
+  let ok = false;
+  try{
+    await navigator.clipboard.writeText(text);
+    ok = true;
+  }catch(err){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{
+      document.execCommand('copy');
+      ok = true;
+    }catch(e2){
+      alert('複製失敗，請手動選取文字複製');
+    }
+    document.body.removeChild(ta);
+  }
+  if(ok){
+    copiedFeedback(btn);
+    saveHistoryEntry();
+  }
+};
+
+function copiedFeedback(btn){
+  const original = btn.textContent;
+  btn.textContent = '✅ 已複製！';
+  btn.classList.add('copied');
+  setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1800);
+}
+
+// ---- clear data ----
+document.getElementById('clearBtn').onclick = ()=>{
+  if(!confirm('確定要清除目前所有已分配的人員與注意事項嗎？此動作無法復原。')) return;
+  people = [];
+  idCounter = 0;
+  document.getElementById('globalNote').value = '';
+  dateInput.value = toISO(defaultTomorrow());
+  updateDateBadge();
+  render();
+};
+
+// ---- history ----
+async function openHistory(){
+  const history = await loadJSON('loben-history', []);
+  const wrap = document.getElementById('historyListWrap');
+  wrap.innerHTML = '';
+  document.getElementById('historyDetailWrap').style.display = 'none';
+  wrap.style.display = 'block';
+  if(!history.length){
+    wrap.innerHTML = '<div class="history-empty">還沒有歷史記錄，複製過的內容會自動存在這裡</div>';
+  } else {
+    history.forEach(h=>{
+      const btn = document.createElement('button');
+      btn.className = 'history-item';
+      const [y,m,d] = h.date.split('-').map(Number);
+      const dt = new Date(y,m-1,d);
+      const weekdays = ["日","一","二","三","四","五","六"];
+      btn.innerHTML = '<span class="hdate">'+m+'/'+d+'（週'+weekdays[dt.getDay()]+'）</span>點擊查看內容';
+      btn.onclick = ()=> showHistoryDetail(h);
+      wrap.appendChild(btn);
+    });
+  }
+  document.getElementById('historyModalBg').classList.add('show');
+}
+
+function showHistoryDetail(h){
+  document.getElementById('historyListWrap').style.display = 'none';
+  const detailWrap = document.getElementById('historyDetailWrap');
+  detailWrap.style.display = 'block';
+  document.getElementById('historyDetailText').textContent = h.text;
+  document.getElementById('historyCopyBtn').onclick = async ()=>{
+    try{ await navigator.clipboard.writeText(h.text); }
+    catch(e){
+      const ta=document.createElement('textarea'); ta.value=h.text; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      try{document.execCommand('copy');}catch(e2){}
+      document.body.removeChild(ta);
+    }
+    const cbtn = document.getElementById('historyCopyBtn');
+    const orig = cbtn.textContent; cbtn.textContent='✅ 已複製'; setTimeout(()=>cbtn.textContent=orig,1500);
+  };
+}
+
+document.getElementById('historyBtn').onclick = openHistory;
+document.getElementById('historyBackBtn').onclick = ()=>{
+  document.getElementById('historyDetailWrap').style.display='none';
+  document.getElementById('historyListWrap').style.display='block';
+};
+document.getElementById('historyCloseBtn').onclick = ()=> document.getElementById('historyModalBg').classList.remove('show');
+document.getElementById('historyModalBg').onclick = (e)=>{ if(e.target.id==='historyModalBg') document.getElementById('historyModalBg').classList.remove('show'); };
+
+render();
+</script>
+</body>
+</html>
