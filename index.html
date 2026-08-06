@@ -304,7 +304,8 @@ const ROLES = ["內場廚師","內場廚助","PT廚助","PT外場","外場正職
 let KNOWN_STAFF = [
   {name:"謝宛廷", role:"內場廚師"},
   {name:"羅湘", role:"外場正職"},
-  {name:"黃少甫", role:"PT廚助"}
+  {name:"黃少甫", role:"PT廚助"},
+  {name:"羅季安", role:""}
 ];
 
 const CATEGORIES = [
@@ -417,6 +418,16 @@ function renderStaffQuick(){
         };
         panel.appendChild(tag);
       });
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'role-tag' + (s.role==='' ? ' active':'');
+      clearBtn.textContent = '無職稱';
+      clearBtn.onclick = async ()=>{
+        s.role = '';
+        editingStaffIdx = null;
+        await saveKnownStaff();
+        renderStaffQuick();
+      };
+      panel.appendChild(clearBtn);
       const doneBtn = document.createElement('button');
       doneBtn.className = 'role-tag';
       doneBtn.textContent = '取消';
@@ -459,12 +470,13 @@ function addPerson(name, role){
   const p = {
     id: 'p'+(idCounter++),
     name: name || '',
-    role: role || ROLES[0],
+    role: (role === undefined) ? ROLES[0] : role,
     checked: new Set(),
     amounts: {},
     important: new Set(),
     customItems: [],
-    note: ''
+    note: '',
+    openCats: new Set()
   };
   people.push(p);
   if(name) syncPersonToKnownStaff(p, {updateRole:false});
@@ -518,6 +530,11 @@ function render(){
       tag.onclick = ()=>{ p.role = r; syncPersonToKnownStaff(p, {updateRole:true}); render(); };
       roleRow.appendChild(tag);
     });
+    const clearRoleTag = document.createElement('button');
+    clearRoleTag.className = 'role-tag' + (p.role==='' ? ' active':'');
+    clearRoleTag.textContent = '無職稱';
+    clearRoleTag.onclick = ()=>{ p.role = ''; syncPersonToKnownStaff(p, {updateRole:true}); render(); };
+    roleRow.appendChild(clearRoleTag);
     nameWrap.appendChild(nameInput);
     nameWrap.appendChild(roleRow);
     const removeBtn = document.createElement('button');
@@ -538,11 +555,12 @@ function render(){
       const allEntries = cat.items.concat(cat.extra || []);
       const checkedCount = allEntries.filter(it=>p.checked.has(itemLabel(it))).length;
       const importantInCat = allEntries.some(it=>p.checked.has(itemLabel(it)) && p.important.has(itemLabel(it)));
+      const isOpenCat = p.openCats.has(cat.name);
       const toggle = document.createElement('button');
-      toggle.className = 'cat-toggle';
+      toggle.className = 'cat-toggle' + (isOpenCat ? ' open' : '');
       toggle.innerHTML = '<span>'+cat.icon+' '+cat.name + (checkedCount? '<span class="count'+(importantInCat?' has-important':'')+'">'+checkedCount+'</span>':'') +'</span><span class="chevron">▾</span>';
       const itemsWrap = document.createElement('div');
-      itemsWrap.className = 'cat-items';
+      itemsWrap.className = 'cat-items' + (isOpenCat ? ' open' : '');
 
       allEntries.forEach(it=>{
         if(typeof it === 'object' && it.hasAmount){
@@ -637,8 +655,9 @@ function render(){
       }
 
       toggle.onclick = ()=>{
-        toggle.classList.toggle('open');
-        itemsWrap.classList.toggle('open');
+        if(p.openCats.has(cat.name)) p.openCats.delete(cat.name);
+        else p.openCats.add(cat.name);
+        render();
       };
       block.appendChild(toggle);
       block.appendChild(itemsWrap);
@@ -739,7 +758,7 @@ function buildOutput(){
 
   people.forEach((p, idx)=>{
     const entries = buildPersonEntries(p);
-    lines.push('👤 ' + (p.name || '未命名') + '（' + p.role + '）');
+    lines.push('👤 ' + (p.name || '未命名') + (p.role ? '（' + p.role + '）' : ''));
     if(entries.length===0){
       lines.push('　（無指派項目）');
     } else {
