@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>羅本家｜隔日待辦分配</title>
+<title>羅本家｜隔日待辦</title>
 <style>
   :root{
     --curry: #C97C2C;
@@ -21,102 +21,94 @@
   body{
     margin:0; background:var(--cream); color:var(--char);
     font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-    padding-bottom: 140px;
+    padding-bottom: 175px;
   }
+  .hidden{display:none !important;}
   header{
     background: var(--char); color: var(--cream);
-    padding: 18px 16px 16px;
+    padding: 16px 16px 14px;
     position: sticky; top:0; z-index: 10;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
   }
-  header h1{
-    font-size: 17px; margin:0 0 2px; font-weight: 700; letter-spacing: .5px;
-    display:flex; align-items:center; gap:6px;
-  }
-  header .sub{font-size:12px; color:#C9BFA8;}
-  .date-row{
-    display:flex; align-items:center; gap:10px; margin-top:12px;
-    background: rgba(255,255,255,0.08); border-radius: var(--radius); padding: 10px 12px;
-  }
-  .date-row label{font-size:12px; color:#D8CDB8; white-space:nowrap;}
-  .date-row input[type=date]{
-    flex:1; background:transparent; border:none; color:#fff; font-size:15px; font-weight:600;
-    -webkit-appearance:none;
-  }
+  header .htitle h1{font-size: 17px; margin:0 0 2px; font-weight: 700;}
+  header .htitle .sub{font-size:11px; color:#C9BFA8;}
   .date-badge{
     background: var(--curry); color:#fff; font-size:12px; font-weight:700;
-    padding: 4px 10px; border-radius: 20px; white-space:nowrap;
+    padding: 5px 12px; border-radius: 20px; white-space:nowrap;
   }
-  .toolbar-row{display:flex; gap:8px; margin-top:8px;}
-  .toolbar-btn{
-    flex:1; background: rgba(255,255,255,0.08); color:#fff; border:none; border-radius:10px;
-    padding: 9px 6px; font-size:12px; font-weight:700;
+  .date-badge-input{
+    background: var(--curry); color:#fff; font-size:12px; font-weight:700;
+    padding: 5px 10px; border-radius: 20px; white-space:nowrap; border:none;
+    -webkit-appearance:none; max-width:118px;
+  }
+  .date-badge-input::-webkit-calendar-picker-indicator{ filter: invert(1); }
+  .lock-btn{
+    background: rgba(255,255,255,0.1); border:none; color:#fff; border-radius: 10px;
+    padding: 9px 12px; font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .back-btn{
+    background: rgba(255,255,255,0.1); border:none; color:#fff; border-radius: 10px;
+    padding: 9px 12px; font-size:13px; font-weight:700;
   }
   main{padding: 14px 12px;}
   .section-title{
     font-size: 13px; font-weight:700; color: var(--curry-dark);
     margin: 18px 4px 8px; display:flex; align-items:center; gap:6px;
   }
-  .staff-quick{
-    display:flex; flex-wrap:wrap; gap:8px; margin: 0 4px 10px;
+  /* --- home roster --- */
+  .roster-grid{display:flex; flex-direction:column; gap:10px; margin:0 4px;}
+  .roster-card{
+    display:flex; align-items:center; gap:12px; background:#fff; border:1.5px solid var(--line);
+    border-radius: var(--radius); padding: 14px; text-align:left;
   }
-  .staff-chip-wrap{
-    display:flex; align-items:center; background:#fff; border:1.5px solid var(--line); border-radius: 20px;
-    overflow:hidden;
+  .roster-card.done{border-color: var(--herb);}
+  .roster-avatar{
+    width:42px; height:42px; border-radius:50%; background:var(--curry); color:#fff;
+    font-weight:700; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
-  .staff-chip{
-    background:none; border:none;
-    padding: 8px 6px 8px 14px; font-size: 13px; color: var(--char); font-weight:600;
-  }
-  .staff-chip small{color:var(--muted); font-weight:400; margin-left:4px;}
-  .staff-edit-btn{
-    background:none; border:none; color:var(--muted); font-size:13px; padding: 8px 12px 8px 4px;
-    border-left: 1px solid var(--line);
-  }
-  .staff-edit-panel{
-    width:100%; background:#fff; border:1.5px solid var(--curry); border-radius: 12px;
-    padding: 10px; margin: -2px 4px 8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;
-  }
-  .staff-edit-panel .label{font-size:12px; color:var(--muted); width:100%; margin-bottom:2px; font-weight:600;}
+  .roster-card.done .roster-avatar{background:var(--herb);}
+  .roster-info{flex:1; min-width:0;}
+  .roster-name{font-size:15px; font-weight:700;}
+  .roster-role{font-size:12px; color:var(--muted); margin-top:1px;}
+  .roster-status{font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; white-space:nowrap;}
+  .roster-status.done{background: rgba(92,122,74,0.12); color: var(--herb);}
+  .roster-status.draft{background: rgba(201,124,44,0.12); color: var(--curry-dark);}
+  .roster-status.todo{background: #F1EAD9; color: var(--muted);}
+  .roster-edit{background:none; border:none; color:var(--muted); font-size:15px; padding:6px 4px; flex-shrink:0;}
   .add-person-btn{
     width:100%; border: 2px dashed var(--curry); background: rgba(201,124,44,0.07);
     color: var(--curry-dark); font-weight:700; font-size:15px;
-    border-radius: var(--radius); padding: 13px; margin: 4px 4px 0;
+    border-radius: var(--radius); padding: 13px; margin: 10px 4px 0;
   }
-  /* person card */
-  .person-card{
-    background: var(--card); border-radius: var(--radius); margin: 0 4px 14px;
-    box-shadow: 0 1px 3px rgba(43,36,32,0.08); overflow:hidden;
-    border: 1px solid var(--line);
+  .inline-form{
+    background:#fff; border:1.5px solid var(--curry); border-radius: var(--radius); padding:14px;
+    margin: 10px 4px 0;
   }
-  .person-head{
-    display:flex; align-items:center; gap:10px; padding: 13px 14px;
-    background: linear-gradient(135deg, #FFF7EA, #FFF);
-    border-bottom: 1px solid var(--line);
+  .inline-form input[type=text]{
+    width:100%; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:14px;
+    background:#FBFAF6; margin-bottom:10px;
   }
-  .person-avatar{
-    width:36px; height:36px; border-radius:50%; background: var(--curry);
-    color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
-  }
-  .person-name-wrap{flex:1; min-width:0;}
-  .person-name-wrap input{
-    font-size:15px; font-weight:700; border:none; background:transparent; width:100%; color:var(--char);
-    padding: 2px 0;
-  }
-  .role-row{display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;}
-  .role-tag{
-    font-size:11px; padding:3px 9px; border-radius: 20px; border:1px solid var(--line);
+  .tag-row{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+  .tag-btn{
+    font-size:12px; padding:6px 12px; border-radius: 20px; border:1px solid var(--line);
     background:#fff; color:var(--muted); font-weight:600;
   }
-  .role-tag.active{background: var(--herb); color:#fff; border-color:var(--herb);}
-  .remove-person{
-    background:none; border:none; color:var(--muted); font-size: 20px; padding: 4px 6px; line-height:1;
+  .tag-btn.active{background: var(--herb); color:#fff; border-color:var(--herb);}
+  .staff-manage-row{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:8px;
   }
-  .item-groups{padding: 10px 12px 4px;}
+  .staff-manage-name{font-weight:700; font-size:14px; margin-bottom:8px;}
+  .inline-form-actions{display:flex; gap:8px;}
+  .inline-form-actions button{flex:1; border:none; border-radius:10px; padding:11px; font-weight:700; font-size:13px;}
+  .btn-primary{background: var(--curry); color:#fff;}
+  .btn-secondary{background:#F1E9D8; color:var(--char);}
+
+  /* --- entry screen categories (shared style) --- */
+  .item-groups{padding: 0 4px;}
   .cat-block{margin-bottom: 8px; border-radius: 10px; overflow:hidden;}
   .cat-toggle{
     width:100%; display:flex; justify-content:space-between; align-items:center;
-    background: #FAF4E6; border:none; padding: 10px 10px; font-size:13px; font-weight:700;
+    background: #FAF4E6; border:none; padding: 12px 12px; font-size:13.5px; font-weight:700;
     color: var(--curry-dark); border-radius:10px;
   }
   .cat-toggle .count{
@@ -126,7 +118,7 @@
   .cat-toggle .chevron{transition: transform .15s; color:var(--muted); font-size:12px;}
   .cat-toggle.open .chevron{transform: rotate(180deg);}
   .cat-items{
-    display:none; padding: 8px 4px 4px; flex-wrap:wrap; gap:8px; flex-direction:row;
+    display:none; padding: 10px 4px 6px; flex-wrap:wrap; gap:8px; flex-direction:row;
   }
   .cat-items.open{display:flex;}
   .chip-group{
@@ -136,29 +128,27 @@
   .chip-group.on{border-color: var(--curry);}
   .chip-group.important{border-color: var(--alert);}
   .chip-main{
-    border:none; background:transparent; padding: 8px 13px; font-size: 13px; color: var(--char); font-weight:500;
+    border:none; background:transparent; padding: 9px 14px; font-size: 14px; color: var(--char); font-weight:500;
   }
   .chip-group.on .chip-main{background: var(--curry); color:#fff; font-weight:700;}
   .chip-important{
-    border:none; background:#fff; padding: 8px 9px; font-size:12px; color:var(--muted); border-left:1px solid var(--line);
+    border:none; background:#fff; padding: 9px 10px; font-size:12px; color:var(--muted); border-left:1px solid var(--line);
   }
   .chip-important.active{background: var(--alert); color:#fff;}
-  .amount-item-row{
-    flex-basis:100%; display:flex; align-items:stretch; gap:8px; margin: 2px 0;
-  }
+  .amount-item-row{flex-basis:100%; display:flex; align-items:stretch; gap:8px; margin: 2px 0;}
   .amount-input{
-    flex:1; border:1px solid var(--line); border-radius:10px; padding:7px 10px; font-size:13px; background:#FBFAF6;
+    flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:14px; background:#FBFAF6;
     min-width:0;
   }
-  .custom-item-row{display:flex; gap:6px; padding: 6px 12px 12px;}
+  .custom-item-row{display:flex; gap:6px; padding: 6px 0 10px;}
   .cat-items .custom-item-row{flex-basis:100%; padding: 4px 4px 2px; margin-top:2px;}
   .custom-item-row input{
-    flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 10px; font-size:13px; background:#FBFAF6;
+    flex:1; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:14px; background:#FBFAF6;
   }
   .custom-item-row button{
     background: var(--char); color:#fff; border:none; border-radius:10px; padding: 0 16px; font-weight:700; font-size:13px;
   }
-  .custom-tags{padding: 0 12px 4px; display:flex; flex-wrap:wrap; gap:6px;}
+  .custom-tags{padding: 0 4px 4px; display:flex; flex-wrap:wrap; gap:6px;}
   .custom-tag{
     background: rgba(184,69,47,0.09); color: var(--char); border-radius:20px; font-size:12px;
     padding:0; display:flex; align-items:stretch; overflow:hidden; font-weight:600;
@@ -168,20 +158,72 @@
   .custom-tag.important{border-color: var(--alert);}
   .custom-tag.important .ctag-text{background: var(--alert); color:#fff;}
   .custom-tag .ctag-remove{background:none; border:none; color:var(--muted); font-size:14px; padding:6px 10px 6px 6px; line-height:1;}
-  .note-wrap{padding: 4px 12px 14px;}
+  .note-wrap{padding: 10px 4px 14px;}
   .note-wrap textarea{
-    width:100%; border:1px solid var(--line); border-radius:10px; padding: 9px 10px;
-    font-size:13px; font-family:inherit; resize:vertical; min-height:44px; background:#FBFAF6;
+    width:100%; border:1px solid var(--line); border-radius:10px; padding: 10px;
+    font-size:14px; font-family:inherit; resize:vertical; min-height:60px; background:#FBFAF6;
   }
-  .note-label{font-size:11px; color:var(--muted); margin-bottom:4px; display:block; font-weight:600;}
+  .note-label{font-size:12px; color:var(--muted); margin-bottom:6px; display:block; font-weight:600;}
 
-  .global-note{
-    background:#fff; border-radius: var(--radius); margin:0 4px; padding: 12px 14px;
-    border: 1px solid var(--line);
+  footer{
+    position: fixed; bottom:0; left:0; right:0; background:#fff;
+    border-top:1px solid var(--line); padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex; gap:10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
   }
+  footer button{flex:1; border:none; border-radius: 12px; padding: 14px; font-size:15px; font-weight:700;}
+  .footer-wrap{flex-wrap:wrap;}
+  .footer-wrap button{flex:1 1 30%; min-width:80px; font-size:13px; padding:12px 6px;}
+  .btn-done{background: var(--herb); color:#fff;}
+  .btn-done.sent{background: var(--curry);}
+
+  /* --- PIN screen --- */
+  .pin-wrap{display:flex; flex-direction:column; align-items:center; padding: 60px 20px;}
+  .pin-wrap h2{font-size:16px; margin-bottom:20px; color:var(--char);}
+  .pin-display{
+    display:flex; gap:12px; margin-bottom:24px;
+  }
+  .pin-dot{width:16px; height:16px; border-radius:50%; border:2px solid var(--curry); background:transparent;}
+  .pin-dot.filled{background: var(--curry);}
+  .pin-pad{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; width:100%; max-width:280px;}
+  .pin-key{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 0; font-size:20px;
+    font-weight:700; color:var(--char);
+  }
+  .pin-key.del{color:var(--alert); font-size:14px;}
+  .pin-error{color:var(--alert); font-size:13px; margin-top:14px; height:16px;}
+
+  /* --- overview --- */
+  .overview-entry{
+    background:#fff; border:1px solid var(--line); border-radius: var(--radius); margin: 0 4px 12px; overflow:hidden;
+  }
+  .overview-entry-head{
+    display:flex; align-items:center; justify-content:space-between; padding: 12px 14px;
+    background: linear-gradient(135deg, #FFF7EA, #FFF); cursor:pointer;
+  }
+  .overview-entry-name{font-size:14px; font-weight:700;}
+  .overview-entry-role{font-size:11px; color:var(--muted); margin-top:2px;}
+  .overview-entry-badge{font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px;}
+  .overview-entry-badge.done{background:rgba(92,122,74,0.12); color:var(--herb);}
+  .overview-entry-badge.draft{background:rgba(201,124,44,0.12); color:var(--curry-dark);}
+  .overview-entry-body{padding: 4px 14px 12px; display:none;}
+  .overview-entry-body.open{display:block;}
+  .overview-item-line{
+    display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px; border-bottom:1px dashed var(--line);
+  }
+  .overview-item-line:last-child{border-bottom:none;}
+  .overview-item-imp{
+    background:none; border:1px solid var(--line); border-radius:20px; font-size:11px; padding:3px 8px; color:var(--muted); flex-shrink:0;
+  }
+  .overview-item-imp.active{background:var(--alert); color:#fff; border-color:var(--alert);}
+  .overview-note-text{font-size:12px; color:var(--muted); margin-top:8px; font-style:italic;}
+  .missing-box{
+    background:#FBF3EC; border:1px dashed var(--alert); border-radius: var(--radius); padding:12px 14px; margin:0 4px 14px;
+    font-size:13px; color:var(--alert);
+  }
+  .global-note{background:#fff; border-radius: var(--radius); margin:0 4px; padding: 12px 14px; border: 1px solid var(--line);}
   .global-note textarea{
     width:100%; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:14px;
-    font-family:inherit; min-height:70px; background:#FBFAF6; margin-top:6px;
+    font-family:inherit; min-height:60px; background:#FBFAF6; margin-top:6px;
   }
   .filler-row{
     display:flex; align-items:center; gap:10px; margin: 14px 4px 0; background:#fff;
@@ -189,23 +231,17 @@
   }
   .filler-row label{font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap;}
   .filler-row input{flex:1; border:none; font-size:14px; font-weight:700; background:transparent; color:var(--char);}
+  .date-edit-row{
+    display:flex; align-items:center; gap:10px; margin: 0 4px 14px; background:#fff;
+    border-radius: var(--radius); padding: 12px 14px; border:1px solid var(--line);
+  }
+  .date-edit-row label{font-size:12px; color:var(--muted); font-weight:600;}
+  .date-edit-row input{flex:1; border:none; font-size:14px; font-weight:700; background:transparent; color:var(--char);}
 
   .empty-hint{
     text-align:center; color:var(--muted); font-size:13px; padding: 30px 20px;
     background:#fff; border-radius: var(--radius); margin: 0 4px; border:1px dashed var(--line);
   }
-
-  footer{
-    position: fixed; bottom:0; left:0; right:0; background:#fff;
-    border-top:1px solid var(--line); padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-    display:flex; gap:10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-  }
-  footer button{
-    flex:1; border:none; border-radius: 12px; padding: 14px; font-size:15px; font-weight:700;
-  }
-  .btn-preview{background:#F1E9D8; color: var(--char);}
-  .btn-copy{background: var(--curry); color:#fff;}
-  .btn-copy.copied{background: var(--herb);}
 
   .modal-bg{
     position:fixed; inset:0; background:rgba(43,36,32,0.5); z-index:50;
@@ -231,51 +267,121 @@
   }
   .history-item .hdate{color:var(--curry-dark); font-weight:700; margin-right:6px;}
   .history-empty{color:var(--muted); font-size:13px; text-align:center; padding:20px;}
-  .history-back{
-    background:none; border:none; color:var(--curry-dark); font-weight:700; font-size:13px; padding:4px 0 10px;
-  }
+  .history-back{background:none; border:none; color:var(--curry-dark); font-weight:700; font-size:13px; padding:4px 0 10px;}
   .history-copy-btn{background: var(--curry) !important;}
+  .toast{
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--char); color:#fff;
+    padding:10px 20px; border-radius:20px; font-size:13px; z-index:60; opacity:0; transition:opacity .25s; pointer-events:none;
+  }
+  .toast.show{opacity:1;}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🍛 羅本家｜隔日待辦分配</h1>
-  <div class="sub">點一點分配工作，完成後複製貼到 LINE 群組</div>
-  <div class="date-row">
-    <label>日期</label>
-    <input type="date" id="dateInput">
-    <span class="date-badge" id="dateBadge"></span>
+<header id="mainHeader">
+  <div class="htitle">
+    <h1 id="headerTitle">🍛 羅本家｜隔日待辦</h1>
+    <div class="sub" id="headerSub">點自己的名字登記待辦工作(日期在右上角)</div>
   </div>
-  <div class="toolbar-row">
-    <button class="toolbar-btn" id="historyBtn">📜 歷史記錄</button>
-    <button class="toolbar-btn" id="clearBtn">🗑 清除本頁資料</button>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <input type="date" class="date-badge-input" id="dateBadgeHome" title="點選修改這批待辦事項是哪一天">
+    <button class="lock-btn" id="lockBtn">🔒總覽</button>
+    <button class="back-btn hidden" id="backBtn">← 返回</button>
   </div>
 </header>
 
-<main>
-  <div class="section-title">👥 常用人員（點一下快速加入，✎ 可改職稱）</div>
-  <div class="staff-quick" id="staffQuick"></div>
-  <button class="add-person-btn" id="addPersonBtn">＋ 新增人員</button>
-
-  <div id="personList" style="margin-top:14px;"></div>
-  <div class="empty-hint" id="emptyHint">還沒有分配任何人員，點上方「＋新增人員」開始</div>
-
-  <div class="section-title">📝 整體特別注意事項</div>
-  <div class="global-note">
-    <span class="note-label">給全體人員的提醒（例：明日雨天、企業訂單加量等）</span>
-    <textarea id="globalNote" placeholder="輸入整體注意事項..."></textarea>
-  </div>
-
-  <div class="filler-row">
-    <label>填表人</label>
-    <input type="text" id="fillerName" value="羅季安">
+<!-- HOME SCREEN -->
+<main id="homeScreen">
+  <div class="section-title">👥 請選擇你的崗位</div>
+  <div class="roster-grid" id="rosterGrid"></div>
+  <button class="add-person-btn" id="addPersonBtn">＋ 新增其他人員</button>
+  <div class="inline-form hidden" id="inlineForm">
+    <input type="text" id="newPersonName" placeholder="輸入姓名">
+    <div class="tag-row" id="newPersonRoles"></div>
+    <div class="inline-form-actions">
+      <button class="btn-secondary" id="cancelAddBtn">取消</button>
+      <button class="btn-primary" id="confirmAddBtn">新增並開始登記</button>
+    </div>
   </div>
 </main>
 
-<footer>
-  <button class="btn-preview" id="previewBtn">預覽</button>
-  <button class="btn-copy" id="copyBtn">📋 複製到 LINE</button>
+<!-- ENTRY SCREEN -->
+<main id="entryScreen" class="hidden">
+  <div class="item-groups" id="entryCategories"></div>
+  <div class="custom-tags" id="entryCustomTags"></div>
+  <div class="custom-item-row" style="padding:6px 4px 12px;">
+    <input type="text" id="entryCustomInput" placeholder="其他自訂臨時任務...">
+    <button id="entryCustomAddBtn">加入</button>
+  </div>
+  <div class="note-wrap">
+    <span class="note-label">給自己的特別注意事項（給店長看）</span>
+    <textarea id="entryNote" placeholder="輸入個人注意事項..."></textarea>
+  </div>
+</main>
+
+<!-- PIN SCREEN -->
+<main id="pinScreen" class="hidden">
+  <div class="pin-wrap">
+    <h2>🔒 請輸入店長PIN碼</h2>
+    <div class="pin-display" id="pinDisplay"></div>
+    <div class="pin-pad" id="pinPad"></div>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+</main>
+
+<!-- OVERVIEW SCREEN -->
+<main id="overviewScreen" class="hidden">
+  <div class="date-edit-row">
+    <label>規劃日期</label>
+    <input type="date" id="overviewDateInput">
+    <button class="lock-btn" id="ovMoveBtn" style="background:var(--curry); color:#fff; flex-shrink:0;">📦搬移資料</button>
+  </div>
+  <div class="section-title">👥 人員管理（點選可修改職稱）</div>
+  <div id="staffManageList" style="margin:0 4px 4px;"></div>
+  <div class="section-title">📋 今日登記狀況</div>
+  <div id="overviewList"></div>
+  <div id="missingBox"></div>
+  <div class="global-note">
+    <span class="note-label" style="margin-bottom:6px; display:block;">整體特別注意事項</span>
+    <textarea id="overviewGlobalNote" placeholder="輸入整體注意事項..."></textarea>
+  </div>
+  <div class="filler-row">
+    <label>彙整人</label>
+    <input type="text" id="overviewFillerName" value="羅季安">
+  </div>
+</main>
+
+<!-- SEND CONFIRM MODAL -->
+<div class="modal-bg" id="sendConfirmModalBg">
+  <div class="modal">
+    <h3>確認發送日期</h3>
+    <p style="font-size:13px; color:var(--muted); margin:0 0 12px;">請確認要送出哪一天的待辦事項總表，如果不對可以在這裡修改。</p>
+    <div class="date-edit-row" style="margin:0 0 12px;">
+      <label>日期</label>
+      <input type="date" id="sendConfirmDate">
+    </div>
+    <div id="sendConfirmMissing" style="font-size:12px; margin-bottom:14px;"></div>
+    <div class="inline-form-actions">
+      <button class="btn-secondary" id="sendConfirmCancel">取消</button>
+      <button class="btn-primary" id="sendConfirmOk">確認送出</button>
+    </div>
+  </div>
+</div>
+
+<footer id="homeFooter" class="hidden">
+  <button class="btn-done" id="homeSendBtn" style="width:100%;">📤 發送總表到Discord</button>
+</footer>
+
+<footer id="entryFooter" class="hidden">
+  <button class="btn-secondary" id="entryBackBtn" style="flex:0.6;">返回</button>
+  <button class="btn-done" id="entryDoneBtn">✅ 完成登記</button>
+</footer>
+
+<footer id="overviewFooter" class="hidden footer-wrap">
+  <button class="btn-secondary" id="ovPreviewBtn" style="flex:1 1 45%;">預覽</button>
+  <button class="btn-secondary" id="ovCopyBtn" style="flex:1 1 45%;">📋複製</button>
+  <button class="btn-secondary" id="ovHistoryBtn" style="flex:1 1 45%;">📜歷史</button>
+  <button class="btn-secondary" id="ovClearBtn" style="flex:1 1 45%;">🗑清除</button>
 </footer>
 
 <div class="modal-bg" id="modalBg">
@@ -293,18 +399,23 @@
     <div id="historyDetailWrap" style="display:none;">
       <button class="history-back" id="historyBackBtn">← 返回列表</button>
       <pre id="historyDetailText"></pre>
-      <button class="modal-close history-copy-btn" id="historyCopyBtn">複製此則</button>
+      <button class="modal-close history-copy-btn" id="historyCopyBtn">📋 複製此則</button>
     </div>
     <button class="modal-close" id="historyCloseBtn">關閉</button>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-const ROLES = ["內場廚師","內場廚助","PT廚助","PT外場","外場正職"];
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1542030520626585632/tgAJXWOrHOJWrZzR8j3TffoETk-0KDewOVQ8cx7qh7TfhPXrcVb68XGdpkMBfpqRThkX";
+const MANAGER_PIN = "0000"; // 想改PIN碼直接改這裡的數字
+
+const ROLES = ["內場廚師","內場廚助","內場正職","PT廚助","PT外場","外場正職"];
 let KNOWN_STAFF = [
   {name:"謝宛廷", role:"內場廚師"},
   {name:"羅湘", role:"外場正職"},
-  {name:"黃少甫", role:"PT廚助"},
+  {name:"黃少甫", role:"內場正職"},
   {name:"羅季安", role:""}
 ];
 
@@ -324,30 +435,9 @@ const CATEGORIES = [
   {name:"庫存盤點", icon:"📋", items:["庫存盤點"]}
 ];
 
-let people = [];
-let idCounter = 0;
-let editingStaffIdx = null;
+function itemLabel(it){ return typeof it === 'object' ? it.name : it; }
 
-function pad(n){return n<10?"0"+n:n;}
-function toISO(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
-function defaultTomorrow(){ const d = new Date(); d.setDate(d.getDate()+1); return d; }
-
-const dateInput = document.getElementById('dateInput');
-const dateBadge = document.getElementById('dateBadge');
-dateInput.value = toISO(defaultTomorrow());
-
-function updateDateBadge(){
-  const [y,m,d] = dateInput.value.split('-').map(Number);
-  const dt = new Date(y, m-1, d);
-  const weekdays = ["日","一","二","三","四","五","六"];
-  dateBadge.textContent = (m)+"/"+d+" (週"+weekdays[dt.getDay()]+")";
-}
-dateInput.addEventListener('change', updateDateBadge);
-updateDateBadge();
-
-// ---- persistence helpers ----
-// 優先使用 Claude 環境的 window.storage；若不存在（例如部署到 GitHub Pages），
-// 自動改用瀏覽器的 localStorage（僅該手機/該瀏覽器本機有效，不會跨裝置同步）。
+// ---- persistence helpers (Claude window.storage, fallback localStorage) ----
 async function storageGetRaw(key){
   try{
     if(window.storage && typeof window.storage.get === 'function'){
@@ -368,88 +458,829 @@ async function storageSetRaw(key, value){
   try{ localStorage.setItem(key, value); }catch(e){}
 }
 async function loadJSON(key, fallback){
-  try{
-    const raw = await storageGetRaw(key);
-    if(raw) return JSON.parse(raw);
-  }catch(e){}
+  try{ const raw = await storageGetRaw(key); if(raw) return JSON.parse(raw); }catch(e){}
   return fallback;
 }
 async function saveJSON(key, value){
   try{ await storageSetRaw(key, JSON.stringify(value)); }catch(e){}
 }
 
+function pad(n){return n<10?"0"+n:n;}
+function toISO(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function tomorrowISO(){ const d = new Date(); d.setDate(d.getDate()+1); return toISO(d); }
+function todayISO(){ return toISO(new Date()); }
+function fmtDate(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  const weekdays = ["日","一","二","三","四","五","六"];
+  return m+"/"+d+"（週"+weekdays[dt.getDay()]+"）";
+}
+
+let workingDate = tomorrowISO();
+let dayData = { entries:{}, globalNote:'', fillerName:'羅季安' };
+let currentPersonName = null;
+let pinInput = '';
+
+function serializeEntry(e){
+  return {
+    role: e.role,
+    checked: Array.from(e.checked),
+    amounts: e.amounts,
+    important: Array.from(e.important),
+    customItems: e.customItems,
+    note: e.note,
+    submitted: !!e.submitted,
+    completedAt: e.completedAt || null
+  };
+}
+function deserializeEntry(raw, fallbackRole){
+  return {
+    role: raw && raw.role !== undefined ? raw.role : (fallbackRole || ''),
+    checked: new Set(raw && raw.checked || []),
+    amounts: (raw && raw.amounts) || {},
+    important: new Set(raw && raw.important || []),
+    customItems: (raw && raw.customItems) || [],
+    note: (raw && raw.note) || '',
+    submitted: !!(raw && raw.submitted),
+    completedAt: raw ? raw.completedAt : null,
+    openCats: new Set()
+  };
+}
+
+async function loadDay(dateIso){
+  const raw = await loadJSON('loben-day::'+dateIso, null);
+  const entries = {};
+  if(raw && raw.entries){
+    Object.keys(raw.entries).forEach(name=>{
+      entries[name] = deserializeEntry(raw.entries[name]);
+    });
+  }
+  return { entries, globalNote: (raw && raw.globalNote) || '', fillerName: (raw && raw.fillerName) || '羅季安' };
+}
+async function saveDay(){
+  const rawEntries = {};
+  Object.keys(dayData.entries).forEach(name=>{
+    rawEntries[name] = serializeEntry(dayData.entries[name]);
+  });
+  await saveJSON('loben-day::'+workingDate, { entries: rawEntries, globalNote: dayData.globalNote, fillerName: dayData.fillerName });
+}
+
 async function saveKnownStaff(){ await saveJSON('loben-known-staff', KNOWN_STAFF); }
 
-function syncPersonToKnownStaff(p, opts){
-  const nm = (p.name || '').trim();
-  if(!nm) return;
-  const existing = KNOWN_STAFF.find(s=>s.name===nm);
-  if(!existing){
-    KNOWN_STAFF.push({name:nm, role:p.role});
-    saveKnownStaff();
-    renderStaffQuick();
-  } else if(opts && opts.updateRole && existing.role !== p.role){
-    existing.role = p.role;
-    saveKnownStaff();
-    renderStaffQuick();
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+async function copyToClipboard(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch(err){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    }catch(e2){ return false; }
   }
 }
 
-function renderStaffQuick(){
-  const staffQuick = document.getElementById('staffQuick');
-  staffQuick.innerHTML = '';
-  KNOWN_STAFF.forEach((s, idx)=>{
-    if(editingStaffIdx === idx){
-      const panel = document.createElement('div');
-      panel.className = 'staff-edit-panel';
-      const label = document.createElement('div');
-      label.className = 'label';
-      label.textContent = s.name + ' — 選擇職稱';
-      panel.appendChild(label);
-      ROLES.forEach(r=>{
-        const tag = document.createElement('button');
-        tag.className = 'role-tag' + (s.role===r ? ' active':'');
-        tag.textContent = r;
-        tag.onclick = async ()=>{
-          s.role = r;
-          editingStaffIdx = null;
-          await saveKnownStaff();
-          renderStaffQuick();
-        };
-        panel.appendChild(tag);
-      });
-      const clearBtn = document.createElement('button');
-      clearBtn.className = 'role-tag' + (s.role==='' ? ' active':'');
-      clearBtn.textContent = '無職稱';
-      clearBtn.onclick = async ()=>{
-        s.role = '';
-        editingStaffIdx = null;
-        await saveKnownStaff();
-        renderStaffQuick();
-      };
-      panel.appendChild(clearBtn);
-      const doneBtn = document.createElement('button');
-      doneBtn.className = 'role-tag';
-      doneBtn.textContent = '取消';
-      doneBtn.onclick = ()=>{ editingStaffIdx = null; renderStaffQuick(); };
-      panel.appendChild(doneBtn);
-      staffQuick.appendChild(panel);
-      return;
+// ---- Discord ----
+async function sendDiscord(content){
+  try{
+    const chunks = [];
+    let remaining = content;
+    while(remaining.length > 1900){
+      let cut = remaining.lastIndexOf('\n', 1900);
+      if(cut <= 0) cut = 1900;
+      chunks.push(remaining.slice(0, cut));
+      remaining = remaining.slice(cut);
     }
-    const wrap = document.createElement('div');
-    wrap.className = 'staff-chip-wrap';
-    const chip = document.createElement('button');
-    chip.className = 'staff-chip';
-    chip.innerHTML = s.name + '<small>'+s.role+'</small>';
-    chip.onclick = ()=> addPerson(s.name, s.role);
-    const editBtn = document.createElement('button');
-    editBtn.className = 'staff-edit-btn';
-    editBtn.textContent = '✎';
-    editBtn.onclick = ()=>{ editingStaffIdx = idx; renderStaffQuick(); };
-    wrap.appendChild(chip);
-    wrap.appendChild(editBtn);
-    staffQuick.appendChild(wrap);
+    chunks.push(remaining);
+    for(const chunk of chunks){
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({content: chunk})
+      });
+    }
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function formatTime(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  return pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function formatDateTime(ts){
+  const d = new Date(ts);
+  return pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function getItemIcon(label){
+  for(const cat of CATEGORIES){
+    const found = cat.items.concat(cat.extra||[]).some(it=>itemLabel(it)===label);
+    if(found) return cat.icon;
+  }
+  return '📝';
+}
+function buildEntryLines(e){
+  const entries = [];
+  e.checked.forEach(label=>{
+    const text = (e.amounts && e.amounts[label]) ? (label + ' ' + e.amounts[label]) : label;
+    entries.push({ label, text, important: e.important.has(label) });
   });
+  e.customItems.forEach(ci=>{
+    entries.push({ label: ci, text: ci, important: e.important.has(ci) });
+  });
+  entries.sort((a,b)=> (b.important?1:0) - (a.important?1:0));
+  return entries;
+}
+function registeredCount(data){
+  data = data || dayData;
+  return Object.values(data.entries).filter(x=>x.submitted).length;
+}
+
+function buildPersonMessage(name, e){
+  const lines = [];
+  lines.push('📅 ' + fmtDate(workingDate) + ' 待辦事項');
+  const timeStr = formatTime(e.completedAt);
+  lines.push((e.submitted?'✅':'📝') + ' **' + name + '**' + (e.role?'（'+e.role+'）':'') + ' ' + (e.submitted? '完成登記' : '更新登記') + (timeStr ? '　🕒 '+timeStr : ''));
+  lines.push('──────────');
+  const items = buildEntryLines(e);
+  if(items.length===0){
+    lines.push('（無項目）');
+  } else {
+    items.forEach(it=> lines.push((it.important?'🔴❗':getItemIcon(it.label)) + ' ' + it.text));
+  }
+  if(e.note && e.note.trim()) lines.push('📝 備註：' + e.note.trim());
+  lines.push('──────────');
+  lines.push('📊 目前進度：' + registeredCount() + '/' + KNOWN_STAFF.length + ' 人已登記完成');
+  return lines.join('\n');
+}
+
+function buildSummary(dateIso, data){
+  dateIso = dateIso || workingDate;
+  data = data || dayData;
+  const lines = [];
+  lines.push('📅 ' + fmtDate(dateIso) + ' 待辦事項');
+  lines.push('📊 登記進度：' + registeredCount(data) + '/' + KNOWN_STAFF.length + ' 人完成');
+  lines.push('══════════');
+  const names = Object.keys(data.entries);
+  if(names.length===0){
+    lines.push('（尚無人登記）');
+  }
+  names.forEach((name, idx)=>{
+    const e = data.entries[name];
+    const items = buildEntryLines(e);
+    lines.push('👤 **' + name + '**' + (e.role?'（'+e.role+'）':'') + '　共'+items.length+'項' + (e.submitted ? '' : '　⚠️尚未按完成'));
+    if(items.length===0){
+      lines.push('　（無指派項目）');
+    } else {
+      items.forEach(it=> lines.push((it.important?'🔴❗':getItemIcon(it.label)) + ' ' + it.text));
+    }
+    if(e.note && e.note.trim()) lines.push('📝 備註：' + e.note.trim());
+    if(idx < names.length-1) lines.push('──────────');
+  });
+  const missing = KNOWN_STAFF.map(s=>s.name).filter(n=> !data.entries[n]);
+  if(missing.length){
+    lines.push('══════════');
+    lines.push('⚠️ 尚未登記：' + missing.join('、'));
+  }
+  if(data.globalNote && data.globalNote.trim()){
+    lines.push('══════════');
+    lines.push('📌 整體注意事項：' + data.globalNote.trim());
+  }
+  lines.push('══════════');
+  lines.push('彙整人：' + (data.fillerName || '') + '　🕒 發送於 ' + formatDateTime(Date.now()));
+  return lines.join('\n');
+}
+
+async function saveHistoryEntry(text, dateIso){
+  dateIso = dateIso || workingDate;
+  let history = await loadJSON('loben-history', []);
+  if(!Array.isArray(history)) history = [];
+  history = history.filter(h=>h.date !== dateIso);
+  history.unshift({date: dateIso, text, savedAt: Date.now()});
+  if(history.length>60) history = history.slice(0,60);
+  await saveJSON('loben-history', history);
+}
+
+// ---- screen management ----
+function showScreen(name){
+  ['homeScreen','entryScreen','pinScreen','overviewScreen'].forEach(id=>{
+    document.getElementById(id).classList.toggle('hidden', id !== name);
+  });
+  document.getElementById('homeFooter').classList.toggle('hidden', name !== 'homeScreen');
+  document.getElementById('entryFooter').classList.toggle('hidden', name !== 'entryScreen');
+  document.getElementById('overviewFooter').classList.toggle('hidden', name !== 'overviewScreen');
+  document.getElementById('backBtn').classList.toggle('hidden', name === 'homeScreen');
+  document.getElementById('lockBtn').classList.toggle('hidden', name !== 'homeScreen');
+  document.getElementById('dateBadgeHome').classList.toggle('hidden', name === 'pinScreen');
+  if(name === 'homeScreen'){
+    document.getElementById('headerTitle').textContent = '🍛 羅本家｜隔日待辦';
+    document.getElementById('headerSub').textContent = '點自己的名字登記待辦工作(日期在右上角)';
+  } else if(name === 'entryScreen'){
+    document.getElementById('headerTitle').textContent = '👤 ' + currentPersonName;
+    document.getElementById('headerSub').textContent = '勾選你要做的事';
+  } else if(name === 'pinScreen'){
+    document.getElementById('headerTitle').textContent = '🔒 店長總覽';
+    document.getElementById('headerSub').textContent = '';
+  } else if(name === 'overviewScreen'){
+    document.getElementById('headerTitle').textContent = '📋 店長總覽';
+    document.getElementById('headerSub').textContent = fmtDate(workingDate);
+  }
+  document.getElementById('dateBadgeHome').value = workingDate;
+}
+
+document.getElementById('dateBadgeHome').onchange = async (ev)=>{
+  const newDate = ev.target.value;
+  if(!newDate) return;
+  workingDate = newDate;
+  await saveJSON('loben-working-date', workingDate);
+  dayData = await loadDay(workingDate);
+  if(!document.getElementById('homeScreen').classList.contains('hidden')){
+    renderHome();
+  }
+  if(!document.getElementById('overviewScreen').classList.contains('hidden')){
+    document.getElementById('overviewDateInput').value = workingDate;
+    document.getElementById('overviewGlobalNote').value = dayData.globalNote || '';
+    document.getElementById('overviewFillerName').value = dayData.fillerName || '羅季安';
+    renderStaffManage();
+    renderOverview();
+  }
+  if(!document.getElementById('entryScreen').classList.contains('hidden')){
+    document.getElementById('headerSub').textContent = '勾選你要做的事';
+  }
+  showToast('已切換到 ' + fmtDate(workingDate));
+};
+
+document.getElementById('backBtn').onclick = ()=>{ showScreen('homeScreen'); renderHome(); };
+
+// ---- HOME ----
+function renderHome(){
+  const grid = document.getElementById('rosterGrid');
+  grid.innerHTML = '';
+  KNOWN_STAFF.forEach((s)=>{
+    const e = dayData.entries[s.name];
+    const card = document.createElement('button');
+    card.className = 'roster-card' + (e && e.submitted ? ' done' : '');
+    const avatar = document.createElement('div');
+    avatar.className = 'roster-avatar';
+    avatar.textContent = s.name.slice(0,1);
+    const info = document.createElement('div');
+    info.className = 'roster-info';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'roster-name';
+    nameEl.textContent = s.name;
+    const roleEl = document.createElement('div');
+    roleEl.className = 'roster-role';
+    roleEl.textContent = s.role || '無職稱';
+    info.appendChild(nameEl);
+    info.appendChild(roleEl);
+    const status = document.createElement('span');
+    let statusClass = 'todo', statusText = '尚未登記';
+    if(e && e.submitted){ statusClass='done'; statusText='✅已登記'; }
+    else if(e){ statusClass='draft'; statusText='編輯中'; }
+    status.className = 'roster-status ' + statusClass;
+    status.textContent = statusText;
+
+    card.appendChild(avatar);
+    card.appendChild(info);
+    card.appendChild(status);
+    card.onclick = ()=> openEntry(s.name, s.role);
+    grid.appendChild(card);
+  });
+}
+
+function openEntry(name, defaultRole){
+  if(!dayData.entries[name]){
+    dayData.entries[name] = deserializeEntry(null, defaultRole);
+  }
+  currentPersonName = name;
+  showScreen('entryScreen');
+  renderEntry();
+}
+
+document.getElementById('addPersonBtn').onclick = ()=>{
+  document.getElementById('inlineForm').classList.remove('hidden');
+  const rolesWrap = document.getElementById('newPersonRoles');
+  rolesWrap.innerHTML = '';
+  let chosenRole = ROLES[0];
+  ROLES.concat(['']).forEach(r=>{
+    const btn = document.createElement('button');
+    btn.className = 'tag-btn' + (r===chosenRole?' active':'');
+    btn.textContent = r || '無職稱';
+    btn.onclick = ()=>{
+      chosenRole = r;
+      Array.from(rolesWrap.children).forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+    };
+    rolesWrap.appendChild(btn);
+  });
+  document.getElementById('confirmAddBtn').onclick = async ()=>{
+    const nm = document.getElementById('newPersonName').value.trim();
+    if(!nm){ showToast('請輸入姓名'); return; }
+    if(!KNOWN_STAFF.find(s=>s.name===nm)){
+      KNOWN_STAFF.push({name:nm, role:chosenRole});
+      await saveKnownStaff();
+    }
+    document.getElementById('newPersonName').value = '';
+    document.getElementById('inlineForm').classList.add('hidden');
+    openEntry(nm, chosenRole);
+  };
+};
+document.getElementById('cancelAddBtn').onclick = ()=>{
+  document.getElementById('inlineForm').classList.add('hidden');
+};
+
+// ---- ENTRY ----
+function renderEntry(){
+  const e = dayData.entries[currentPersonName];
+  const groups = document.getElementById('entryCategories');
+  groups.innerHTML = '';
+
+  CATEGORIES.forEach(cat=>{
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    const allEntries = cat.items.concat(cat.extra || []);
+    const checkedCount = allEntries.filter(it=>e.checked.has(itemLabel(it))).length;
+    const importantInCat = allEntries.some(it=>e.checked.has(itemLabel(it)) && e.important.has(itemLabel(it)));
+    const isOpenCat = e.openCats.has(cat.name);
+    const toggle = document.createElement('button');
+    toggle.className = 'cat-toggle' + (isOpenCat?' open':'');
+    toggle.innerHTML = '<span>'+cat.icon+' '+cat.name + (checkedCount? '<span class="count'+(importantInCat?' has-important':'')+'">'+checkedCount+'</span>':'') +'</span><span class="chevron">▾</span>';
+    const itemsWrap = document.createElement('div');
+    itemsWrap.className = 'cat-items' + (isOpenCat?' open':'');
+
+    allEntries.forEach(it=>{
+      if(typeof it === 'object' && it.hasAmount){
+        const label = it.name;
+        const isOn = e.checked.has(label);
+        const isImp = e.important.has(label);
+        const row = document.createElement('div');
+        row.className = 'amount-item-row';
+        const group = document.createElement('div');
+        group.className = 'chip-group' + (isOn?' on':'') + (isImp?' important':'');
+        const mainBtn = document.createElement('button');
+        mainBtn.className = 'chip-main';
+        mainBtn.textContent = label;
+        mainBtn.onclick = ()=>{
+          if(e.checked.has(label)){ e.checked.delete(label); delete e.amounts[label]; e.important.delete(label); }
+          else { e.checked.add(label); }
+          saveDay(); renderEntry();
+        };
+        group.appendChild(mainBtn);
+        if(isOn){
+          const impBtn = document.createElement('button');
+          impBtn.className = 'chip-important' + (isImp?' active':'');
+          impBtn.textContent = '❗';
+          impBtn.onclick = (ev)=>{ ev.stopPropagation();
+            if(e.important.has(label)) e.important.delete(label); else e.important.add(label);
+            saveDay(); renderEntry();
+          };
+          group.appendChild(impBtn);
+        }
+        const amtInput = document.createElement('input');
+        amtInput.type = 'text';
+        amtInput.className = 'amount-input';
+        amtInput.placeholder = it.placeholder || '填寫數量';
+        amtInput.value = e.amounts[label] || '';
+        amtInput.oninput = (ev)=>{
+          e.amounts[label] = ev.target.value;
+          if(!e.checked.has(label)) e.checked.add(label);
+          saveDay();
+        };
+        row.appendChild(group);
+        row.appendChild(amtInput);
+        itemsWrap.appendChild(row);
+      } else {
+        const label = itemLabel(it);
+        const isOn = e.checked.has(label);
+        const isImp = e.important.has(label);
+        const group = document.createElement('div');
+        group.className = 'chip-group' + (isOn?' on':'') + (isImp?' important':'');
+        const mainBtn = document.createElement('button');
+        mainBtn.className = 'chip-main';
+        mainBtn.textContent = label;
+        mainBtn.onclick = ()=>{
+          if(e.checked.has(label)){ e.checked.delete(label); e.important.delete(label); }
+          else { e.checked.add(label); }
+          saveDay(); renderEntry();
+        };
+        group.appendChild(mainBtn);
+        if(isOn){
+          const impBtn = document.createElement('button');
+          impBtn.className = 'chip-important' + (isImp?' active':'');
+          impBtn.textContent = '❗';
+          impBtn.onclick = (ev)=>{ ev.stopPropagation();
+            if(e.important.has(label)) e.important.delete(label); else e.important.add(label);
+            saveDay(); renderEntry();
+          };
+          group.appendChild(impBtn);
+        }
+        itemsWrap.appendChild(group);
+      }
+    });
+
+    if(cat.manualInput){
+      const manualRow = document.createElement('div');
+      manualRow.className = 'custom-item-row';
+      const mInput = document.createElement('input');
+      mInput.placeholder = cat.manualPlaceholder || '輸入項目...';
+      const mBtn = document.createElement('button');
+      mBtn.textContent = '加入';
+      const addManual = async ()=>{
+        const v = mInput.value.trim();
+        if(!v) return;
+        e.checked.add(v);
+        const exists = cat.items.some(x=>itemLabel(x)===v) || (cat.extra||[]).includes(v);
+        if(!exists){
+          cat.extra = cat.extra || [];
+          cat.extra.push(v);
+          await saveJSON('loben-extra::'+cat.name, cat.extra);
+        }
+        mInput.value = '';
+        saveDay(); renderEntry();
+      };
+      mBtn.onclick = addManual;
+      mInput.onkeydown = (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); addManual(); } };
+      manualRow.appendChild(mInput);
+      manualRow.appendChild(mBtn);
+      itemsWrap.appendChild(manualRow);
+    }
+
+    toggle.onclick = ()=>{
+      if(e.openCats.has(cat.name)) e.openCats.delete(cat.name); else e.openCats.add(cat.name);
+      renderEntry();
+    };
+    block.appendChild(toggle);
+    block.appendChild(itemsWrap);
+    groups.appendChild(block);
+  });
+
+  const tagsWrap = document.getElementById('entryCustomTags');
+  tagsWrap.innerHTML = '';
+  e.customItems.forEach((ci, idx)=>{
+    const isImp = e.important.has(ci);
+    const tag = document.createElement('div');
+    tag.className = 'custom-tag' + (isImp?' important':'');
+    const textBtn = document.createElement('button');
+    textBtn.className = 'ctag-text';
+    textBtn.textContent = (isImp?'❗':'') + ci;
+    textBtn.onclick = ()=>{ if(e.important.has(ci)) e.important.delete(ci); else e.important.add(ci); saveDay(); renderEntry(); };
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'ctag-remove';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = ()=>{ e.customItems.splice(idx,1); e.important.delete(ci); saveDay(); renderEntry(); };
+    tag.appendChild(textBtn);
+    tag.appendChild(removeBtn);
+    tagsWrap.appendChild(tag);
+  });
+
+  document.getElementById('entryNote').value = e.note;
+}
+
+document.getElementById('entryCustomAddBtn').onclick = ()=>{
+  const input = document.getElementById('entryCustomInput');
+  const v = input.value.trim();
+  if(v){
+    dayData.entries[currentPersonName].customItems.push(v);
+    input.value = '';
+    saveDay(); renderEntry();
+  }
+};
+document.getElementById('entryCustomInput').onkeydown = (ev)=>{
+  if(ev.key==='Enter'){ ev.preventDefault(); document.getElementById('entryCustomAddBtn').click(); }
+};
+document.getElementById('entryNote').oninput = (ev)=>{
+  dayData.entries[currentPersonName].note = ev.target.value;
+  saveDay();
+};
+document.getElementById('entryBackBtn').onclick = ()=>{
+  showScreen('homeScreen'); renderHome();
+};
+document.getElementById('entryDoneBtn').onclick = async ()=>{
+  const e = dayData.entries[currentPersonName];
+  e.submitted = true;
+  e.completedAt = Date.now();
+  await saveDay();
+  const msg = buildPersonMessage(currentPersonName, e);
+  const ok = await sendDiscord(msg);
+  showToast(ok ? '已完成登記並通知店長 ✅' : '已完成登記（Discord通知失敗，請確認網路）');
+  showScreen('homeScreen'); renderHome();
+};
+
+// ---- PIN ----
+function renderPinPad(){
+  const pad = document.getElementById('pinPad');
+  pad.innerHTML = '';
+  const keys = ['1','2','3','4','5','6','7','8','9','','0','del'];
+  keys.forEach(k=>{
+    const btn = document.createElement('button');
+    if(k===''){ btn.style.visibility='hidden'; btn.className='pin-key'; }
+    else if(k==='del'){ btn.className='pin-key del'; btn.textContent='刪除'; btn.onclick = ()=>{ pinInput = pinInput.slice(0,-1); updatePinDisplay(); }; }
+    else{
+      btn.className = 'pin-key'; btn.textContent = k;
+      btn.onclick = ()=>{
+        if(pinInput.length < 4){ pinInput += k; updatePinDisplay(); }
+        if(pinInput.length === 4) checkPin();
+      };
+    }
+    pad.appendChild(btn);
+  });
+}
+function updatePinDisplay(){
+  const disp = document.getElementById('pinDisplay');
+  disp.innerHTML = '';
+  for(let i=0;i<4;i++){
+    const dot = document.createElement('div');
+    dot.className = 'pin-dot' + (i < pinInput.length ? ' filled' : '');
+    disp.appendChild(dot);
+  }
+}
+async function checkPin(){
+  if(pinInput === MANAGER_PIN){
+    document.getElementById('pinError').textContent = '';
+    pinInput = '';
+    await enterOverview();
+  } else {
+    document.getElementById('pinError').textContent = 'PIN碼錯誤，請再試一次';
+    pinInput = '';
+    updatePinDisplay();
+  }
+}
+document.getElementById('lockBtn').onclick = ()=>{
+  pinInput = '';
+  document.getElementById('pinError').textContent = '';
+  updatePinDisplay();
+  renderPinPad();
+  showScreen('pinScreen');
+};
+
+// ---- OVERVIEW ----
+async function enterOverview(){
+  document.getElementById('overviewDateInput').value = workingDate;
+  document.getElementById('overviewGlobalNote').value = dayData.globalNote || '';
+  document.getElementById('overviewFillerName').value = dayData.fillerName || '羅季安';
+  showScreen('overviewScreen');
+  renderStaffManage();
+  renderOverview();
+}
+document.getElementById('overviewDateInput').onchange = async (ev)=>{
+  workingDate = ev.target.value;
+  await saveJSON('loben-working-date', workingDate);
+  dayData = await loadDay(workingDate);
+  document.getElementById('overviewGlobalNote').value = dayData.globalNote || '';
+  document.getElementById('overviewFillerName').value = dayData.fillerName || '羅季安';
+  document.getElementById('dateBadgeHome').value = workingDate;
+  showScreen('overviewScreen');
+  renderStaffManage();
+  renderOverview();
+};
+document.getElementById('overviewGlobalNote').oninput = (ev)=>{ dayData.globalNote = ev.target.value; saveDay(); };
+document.getElementById('overviewFillerName').oninput = (ev)=>{ dayData.fillerName = ev.target.value; saveDay(); };
+
+async function moveDayData(fromDate, toDate){
+  const fromData = await loadJSON('loben-day::'+fromDate, null);
+  if(!fromData || Object.keys(fromData.entries||{}).length===0){
+    alert('「'+fmtDate(fromDate)+'」目前沒有資料可以搬移');
+    return;
+  }
+  const existingTarget = await loadJSON('loben-day::'+toDate, null);
+  if(existingTarget && Object.keys(existingTarget.entries||{}).length){
+    if(!confirm('目標日期「'+fmtDate(toDate)+'」已經有資料了，搬移會直接覆蓋掉，確定要繼續嗎？')) return;
+  }
+  await saveJSON('loben-day::'+toDate, fromData);
+  await saveJSON('loben-day::'+fromDate, {entries:{}, globalNote:'', fillerName: fromData.fillerName || '羅季安'});
+  workingDate = toDate;
+  await saveJSON('loben-working-date', workingDate);
+  dayData = await loadDay(workingDate);
+  document.getElementById('overviewDateInput').value = workingDate;
+  document.getElementById('overviewGlobalNote').value = dayData.globalNote || '';
+  document.getElementById('overviewFillerName').value = dayData.fillerName || '羅季安';
+  document.getElementById('dateBadgeHome').value = workingDate;
+  renderStaffManage();
+  renderOverview();
+  showToast('已把資料搬移到 ' + fmtDate(workingDate));
+}
+document.getElementById('ovMoveBtn').onclick = async ()=>{
+  const target = prompt('要把目前「'+fmtDate(workingDate)+'」的資料搬移到哪一天？\n請輸入日期，格式如 2026-08-31', workingDate);
+  if(!target) return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(target)){
+    alert('日期格式不對，請用「年-月-日」的格式，例如 2026-08-31');
+    return;
+  }
+  await moveDayData(workingDate, target);
+};
+
+function renderStaffManage(){
+  const wrap = document.getElementById('staffManageList');
+  wrap.innerHTML = '';
+  KNOWN_STAFF.forEach((s)=>{
+    const row = document.createElement('div');
+    row.className = 'staff-manage-row';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'staff-manage-name';
+    nameEl.textContent = s.name;
+    const tagRow = document.createElement('div');
+    tagRow.className = 'tag-row';
+    ROLES.concat(['']).forEach(r=>{
+      const btn = document.createElement('button');
+      btn.className = 'tag-btn' + (s.role===r ? ' active':'');
+      btn.textContent = r || '無職稱';
+      btn.onclick = async ()=>{
+        s.role = r;
+        await saveKnownStaff();
+        if(dayData.entries[s.name] && !dayData.entries[s.name].submitted){
+          dayData.entries[s.name].role = r;
+          await saveDay();
+        }
+        renderStaffManage();
+        showToast(s.name + ' 職稱已更新為「' + (r || '無職稱') + '」');
+      };
+      tagRow.appendChild(btn);
+    });
+    row.appendChild(nameEl);
+    row.appendChild(tagRow);
+    wrap.appendChild(row);
+  });
+}
+
+let overviewOpenSet = new Set();
+function renderOverview(){
+  const list = document.getElementById('overviewList');
+  list.innerHTML = '';
+  const names = Object.keys(dayData.entries);
+  if(names.length===0){
+    list.innerHTML = '<div class="empty-hint">目前還沒有人登記</div>';
+  }
+  names.forEach(name=>{
+    const e = dayData.entries[name];
+    const wrap = document.createElement('div');
+    wrap.className = 'overview-entry';
+    const head = document.createElement('div');
+    head.className = 'overview-entry-head';
+    const isOpen = overviewOpenSet.has(name);
+    head.innerHTML = '<div><div class="overview-entry-name">👤 '+name+(e.role?'（'+e.role+'）':'')+'</div>'
+      + '<div class="overview-entry-role">'+buildEntryLines(e).length+' 項工作</div></div>'
+      + '<span class="overview-entry-badge '+(e.submitted?'done':'draft')+'">'+(e.submitted?'✅已完成':'編輯中')+'</span>';
+    head.onclick = ()=>{ if(overviewOpenSet.has(name)) overviewOpenSet.delete(name); else overviewOpenSet.add(name); renderOverview(); };
+    const body = document.createElement('div');
+    body.className = 'overview-entry-body' + (isOpen?' open':'');
+    const items = buildEntryLines(e);
+    if(items.length===0){
+      body.innerHTML = '<div class="overview-item-line">（無指派項目）</div>';
+    } else {
+      items.forEach(it=>{
+        const line = document.createElement('div');
+        line.className = 'overview-item-line';
+        const span = document.createElement('span');
+        span.style.flex = '1';
+        span.textContent = it.text;
+        const impBtn = document.createElement('button');
+        impBtn.className = 'overview-item-imp' + (it.important?' active':'');
+        impBtn.textContent = it.important ? '重要' : '標重要';
+        impBtn.onclick = ()=>{
+          if(e.important.has(it.label)) e.important.delete(it.label);
+          else e.important.add(it.label);
+          saveDay(); renderOverview();
+        };
+        line.appendChild(span);
+        line.appendChild(impBtn);
+        body.appendChild(line);
+      });
+    }
+    if(e.note && e.note.trim()){
+      const noteEl = document.createElement('div');
+      noteEl.className = 'overview-note-text';
+      noteEl.textContent = '📝 ' + e.note.trim();
+      body.appendChild(noteEl);
+    }
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    list.appendChild(wrap);
+  });
+
+  const missingBox = document.getElementById('missingBox');
+  const missing = KNOWN_STAFF.map(s=>s.name).filter(n=> !dayData.entries[n]);
+  if(missing.length){
+    missingBox.innerHTML = '<div class="missing-box">⚠️ 尚未登記：'+missing.join('、')+'</div>';
+  } else {
+    missingBox.innerHTML = '';
+  }
+}
+
+document.getElementById('ovPreviewBtn').onclick = ()=>{
+  document.getElementById('previewText').textContent = buildSummary();
+  document.getElementById('modalBg').classList.add('show');
+};
+document.getElementById('ovCopyBtn').onclick = async ()=>{
+  const ok = await copyToClipboard(buildSummary());
+  showToast(ok ? '已複製，可貼到LINE ✅' : '複製失敗，請手動選取文字');
+};
+document.getElementById('modalClose').onclick = ()=> document.getElementById('modalBg').classList.remove('show');
+document.getElementById('modalBg').onclick = (e)=>{ if(e.target.id==='modalBg') document.getElementById('modalBg').classList.remove('show'); };
+
+document.getElementById('ovClearBtn').onclick = async ()=>{
+  if(!confirm('確定要清除「'+fmtDate(workingDate)+'」的所有登記資料嗎？此動作無法復原。')) return;
+  dayData = { entries:{}, globalNote:'', fillerName: dayData.fillerName || '羅季安' };
+  await saveDay();
+  document.getElementById('overviewGlobalNote').value = '';
+  renderOverview();
+  showToast('已清除本日資料');
+};
+
+document.getElementById('homeSendBtn').onclick = async ()=>{
+  document.getElementById('sendConfirmDate').value = workingDate;
+  await updateSendConfirmMissing(workingDate);
+  document.getElementById('sendConfirmModalBg').classList.add('show');
+};
+document.getElementById('sendConfirmDate').onchange = (ev)=> updateSendConfirmMissing(ev.target.value);
+async function updateSendConfirmMissing(dateIso){
+  const data = (dateIso === workingDate) ? dayData : await loadDay(dateIso);
+  const missing = KNOWN_STAFF.map(s=>s.name).filter(n=> !data.entries[n] || !data.entries[n].submitted);
+  const box = document.getElementById('sendConfirmMissing');
+  if(missing.length){
+    box.style.color = 'var(--alert)';
+    box.textContent = '⚠️ 尚未完成登記：' + missing.join('、');
+  } else {
+    box.style.color = 'var(--herb)';
+    box.textContent = '✅ 所有人都已完成登記';
+  }
+}
+document.getElementById('sendConfirmCancel').onclick = ()=>{
+  document.getElementById('sendConfirmModalBg').classList.remove('show');
+};
+document.getElementById('sendConfirmOk').onclick = async ()=>{
+  const dateIso = document.getElementById('sendConfirmDate').value;
+  const data = (dateIso === workingDate) ? dayData : await loadDay(dateIso);
+  const text = buildSummary(dateIso, data);
+  const btn = document.getElementById('sendConfirmOk');
+  btn.textContent = '發送中...';
+  const ok = await sendDiscord(text);
+  btn.textContent = '確認送出';
+  document.getElementById('sendConfirmModalBg').classList.remove('show');
+  if(ok){
+    await saveHistoryEntry(text, dateIso);
+    showToast('已發送 ' + fmtDate(dateIso) + ' 總表到Discord ✅');
+  } else {
+    alert('發送失敗，請確認網路連線後再試一次');
+  }
+};
+
+// ---- history ----
+async function openHistory(){
+  const history = await loadJSON('loben-history', []);
+  const wrap = document.getElementById('historyListWrap');
+  wrap.innerHTML = '';
+  document.getElementById('historyDetailWrap').style.display = 'none';
+  wrap.style.display = 'block';
+  if(!history.length){
+    wrap.innerHTML = '<div class="history-empty">還沒有歷史記錄，發送過的總表會自動存在這裡</div>';
+  } else {
+    history.forEach(h=>{
+      const btn = document.createElement('button');
+      btn.className = 'history-item';
+      btn.innerHTML = '<span class="hdate">'+fmtDate(h.date)+'</span>點擊查看內容';
+      btn.onclick = ()=>{
+        wrap.style.display = 'none';
+        document.getElementById('historyDetailWrap').style.display = 'block';
+        document.getElementById('historyDetailText').textContent = h.text;
+        document.getElementById('historyCopyBtn').onclick = async ()=>{
+          const ok = await copyToClipboard(h.text);
+          showToast(ok ? '已複製，可貼到LINE ✅' : '複製失敗，請手動選取文字');
+        };
+      };
+      wrap.appendChild(btn);
+    });
+  }
+  document.getElementById('historyModalBg').classList.add('show');
+}
+document.getElementById('ovHistoryBtn').onclick = openHistory;
+document.getElementById('historyBackBtn').onclick = ()=>{
+  document.getElementById('historyDetailWrap').style.display='none';
+  document.getElementById('historyListWrap').style.display='block';
+};
+document.getElementById('historyCloseBtn').onclick = ()=> document.getElementById('historyModalBg').classList.remove('show');
+document.getElementById('historyModalBg').onclick = (e)=>{ if(e.target.id==='historyModalBg') document.getElementById('historyModalBg').classList.remove('show'); };
+
+// ---- init ----
+function defaultWorkingDate(saved){
+  // 只在「完全沒設定過」或「存的日期已經過期(等於或早於今天)」時，給一個預設建議值(明天)。
+  // 其餘時候完全尊重目前設定的日期，不會自動幫你跳掉，因為隔天不一定是下個營業日(可能公休)。
+  const nowISO = todayISO();
+  if(!saved || saved <= nowISO) return tomorrowISO();
+  return saved;
 }
 
 (async ()=>{
@@ -462,444 +1293,29 @@ function renderStaffQuick(){
       if(Array.isArray(extra)) cat.extra = extra;
     }
   }
-  renderStaffQuick();
-  render();
+
+  const savedWorkingDate = await loadJSON('loben-working-date', null);
+  workingDate = defaultWorkingDate(savedWorkingDate);
+  await saveJSON('loben-working-date', workingDate);
+  dayData = await loadDay(workingDate);
+
+  showScreen('homeScreen');
+  renderHome();
+
+  // 安全機制：只在「目前設定的日期已經是今天或更早」這種明確過期的狀況下才自動往後推一天，
+  // 避免iPad長時間沒有關閉、跨過午夜後日期卡住不動。店長在總覽畫面手動查看舊日期資料時不會被打斷。
+  setInterval(async ()=>{
+    if(!document.getElementById('overviewScreen').classList.contains('hidden')) return;
+    if(workingDate <= todayISO()){
+      workingDate = tomorrowISO();
+      await saveJSON('loben-working-date', workingDate);
+      dayData = await loadDay(workingDate);
+      document.getElementById('dateBadgeHome').value = workingDate;
+      if(!document.getElementById('homeScreen').classList.contains('hidden')) renderHome();
+      showToast('偵測到日期已過期，自動往後推進為 ' + fmtDate(workingDate));
+    }
+  }, 3 * 60 * 1000);
 })();
-
-function addPerson(name, role){
-  const p = {
-    id: 'p'+(idCounter++),
-    name: name || '',
-    role: (role === undefined) ? ROLES[0] : role,
-    checked: new Set(),
-    amounts: {},
-    important: new Set(),
-    customItems: [],
-    note: '',
-    openCats: new Set()
-  };
-  people.push(p);
-  if(name) syncPersonToKnownStaff(p, {updateRole:false});
-  render();
-}
-
-document.getElementById('addPersonBtn').onclick = ()=> addPerson('', ROLES[0]);
-
-function removePerson(id){
-  people = people.filter(p=>p.id!==id);
-  render();
-}
-
-function itemLabel(it){ return typeof it === 'object' ? it.name : it; }
-
-function toggleImportant(p, label){
-  if(p.important.has(label)) p.important.delete(label);
-  else p.important.add(label);
-  render();
-}
-
-function render(){
-  const list = document.getElementById('personList');
-  const emptyHint = document.getElementById('emptyHint');
-  list.innerHTML = '';
-  emptyHint.style.display = people.length ? 'none' : 'block';
-
-  people.forEach(p=>{
-    const card = document.createElement('div');
-    card.className = 'person-card';
-
-    // head
-    const head = document.createElement('div');
-    head.className = 'person-head';
-    const avatar = document.createElement('div');
-    avatar.className = 'person-avatar';
-    avatar.textContent = (p.name || '？').slice(0,1);
-    const nameWrap = document.createElement('div');
-    nameWrap.className = 'person-name-wrap';
-    const nameInput = document.createElement('input');
-    nameInput.placeholder = '輸入姓名';
-    nameInput.value = p.name;
-    nameInput.oninput = (e)=>{ p.name = e.target.value; avatar.textContent = (p.name||'？').slice(0,1); };
-    nameInput.onblur = ()=>{ syncPersonToKnownStaff(p, {updateRole:false}); };
-    const roleRow = document.createElement('div');
-    roleRow.className = 'role-row';
-    ROLES.forEach(r=>{
-      const tag = document.createElement('button');
-      tag.className = 'role-tag' + (p.role===r ? ' active':'');
-      tag.textContent = r;
-      tag.onclick = ()=>{ p.role = r; syncPersonToKnownStaff(p, {updateRole:true}); render(); };
-      roleRow.appendChild(tag);
-    });
-    const clearRoleTag = document.createElement('button');
-    clearRoleTag.className = 'role-tag' + (p.role==='' ? ' active':'');
-    clearRoleTag.textContent = '無職稱';
-    clearRoleTag.onclick = ()=>{ p.role = ''; syncPersonToKnownStaff(p, {updateRole:true}); render(); };
-    roleRow.appendChild(clearRoleTag);
-    nameWrap.appendChild(nameInput);
-    nameWrap.appendChild(roleRow);
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-person';
-    removeBtn.textContent = '✕';
-    removeBtn.onclick = ()=> removePerson(p.id);
-    head.appendChild(avatar);
-    head.appendChild(nameWrap);
-    head.appendChild(removeBtn);
-    card.appendChild(head);
-
-    // item groups
-    const groups = document.createElement('div');
-    groups.className = 'item-groups';
-    CATEGORIES.forEach(cat=>{
-      const block = document.createElement('div');
-      block.className = 'cat-block';
-      const allEntries = cat.items.concat(cat.extra || []);
-      const checkedCount = allEntries.filter(it=>p.checked.has(itemLabel(it))).length;
-      const importantInCat = allEntries.some(it=>p.checked.has(itemLabel(it)) && p.important.has(itemLabel(it)));
-      const isOpenCat = p.openCats.has(cat.name);
-      const toggle = document.createElement('button');
-      toggle.className = 'cat-toggle' + (isOpenCat ? ' open' : '');
-      toggle.innerHTML = '<span>'+cat.icon+' '+cat.name + (checkedCount? '<span class="count'+(importantInCat?' has-important':'')+'">'+checkedCount+'</span>':'') +'</span><span class="chevron">▾</span>';
-      const itemsWrap = document.createElement('div');
-      itemsWrap.className = 'cat-items' + (isOpenCat ? ' open' : '');
-
-      allEntries.forEach(it=>{
-        if(typeof it === 'object' && it.hasAmount){
-          const label = it.name;
-          const isOn = p.checked.has(label);
-          const isImp = p.important.has(label);
-          const row = document.createElement('div');
-          row.className = 'amount-item-row';
-
-          const group = document.createElement('div');
-          group.className = 'chip-group' + (isOn?' on':'') + (isImp?' important':'');
-          const mainBtn = document.createElement('button');
-          mainBtn.className = 'chip-main';
-          mainBtn.textContent = label;
-          mainBtn.onclick = ()=>{
-            if(p.checked.has(label)){ p.checked.delete(label); delete p.amounts[label]; p.important.delete(label); }
-            else { p.checked.add(label); }
-            render();
-          };
-          group.appendChild(mainBtn);
-          if(isOn){
-            const impBtn = document.createElement('button');
-            impBtn.className = 'chip-important' + (isImp?' active':'');
-            impBtn.textContent = '❗';
-            impBtn.onclick = (e)=>{ e.stopPropagation(); toggleImportant(p, label); };
-            group.appendChild(impBtn);
-          }
-
-          const amtInput = document.createElement('input');
-          amtInput.type = 'text';
-          amtInput.className = 'amount-input';
-          amtInput.placeholder = it.placeholder || '填寫數量';
-          amtInput.value = p.amounts[label] || '';
-          amtInput.oninput = (e)=>{
-            p.amounts[label] = e.target.value;
-            if(!p.checked.has(label)) p.checked.add(label);
-          };
-          row.appendChild(group);
-          row.appendChild(amtInput);
-          itemsWrap.appendChild(row);
-        } else {
-          const label = itemLabel(it);
-          const isOn = p.checked.has(label);
-          const isImp = p.important.has(label);
-          const group = document.createElement('div');
-          group.className = 'chip-group' + (isOn?' on':'') + (isImp?' important':'');
-          const mainBtn = document.createElement('button');
-          mainBtn.className = 'chip-main';
-          mainBtn.textContent = label;
-          mainBtn.onclick = ()=>{
-            if(p.checked.has(label)){ p.checked.delete(label); p.important.delete(label); }
-            else { p.checked.add(label); }
-            render();
-          };
-          group.appendChild(mainBtn);
-          if(isOn){
-            const impBtn = document.createElement('button');
-            impBtn.className = 'chip-important' + (isImp?' active':'');
-            impBtn.textContent = '❗';
-            impBtn.onclick = (e)=>{ e.stopPropagation(); toggleImportant(p, label); };
-            group.appendChild(impBtn);
-          }
-          itemsWrap.appendChild(group);
-        }
-      });
-
-      if(cat.manualInput){
-        const manualRow = document.createElement('div');
-        manualRow.className = 'custom-item-row';
-        const mInput = document.createElement('input');
-        mInput.placeholder = cat.manualPlaceholder || '輸入項目...';
-        const mBtn = document.createElement('button');
-        mBtn.textContent = '加入';
-        const addManual = async ()=>{
-          const v = mInput.value.trim();
-          if(!v) return;
-          p.checked.add(v);
-          const exists = cat.items.some(x=>itemLabel(x)===v) || (cat.extra||[]).includes(v);
-          if(!exists){
-            cat.extra = cat.extra || [];
-            cat.extra.push(v);
-            await saveJSON('loben-extra::'+cat.name, cat.extra);
-          }
-          mInput.value = '';
-          render();
-        };
-        mBtn.onclick = addManual;
-        mInput.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addManual(); } };
-        manualRow.appendChild(mInput);
-        manualRow.appendChild(mBtn);
-        itemsWrap.appendChild(manualRow);
-      }
-
-      toggle.onclick = ()=>{
-        if(p.openCats.has(cat.name)) p.openCats.delete(cat.name);
-        else p.openCats.add(cat.name);
-        render();
-      };
-      block.appendChild(toggle);
-      block.appendChild(itemsWrap);
-      groups.appendChild(block);
-    });
-    card.appendChild(groups);
-
-    // custom items tags (general, not tied to a category)
-    if(p.customItems.length){
-      const tagsWrap = document.createElement('div');
-      tagsWrap.className = 'custom-tags';
-      p.customItems.forEach((ci, idx)=>{
-        const isImp = p.important.has(ci);
-        const tag = document.createElement('div');
-        tag.className = 'custom-tag' + (isImp ? ' important':'');
-        const textBtn = document.createElement('button');
-        textBtn.className = 'ctag-text';
-        textBtn.textContent = (isImp?'❗':'') + ci;
-        textBtn.onclick = ()=> toggleImportant(p, ci);
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'ctag-remove';
-        removeBtn.textContent = '✕';
-        removeBtn.onclick = ()=>{ p.customItems.splice(idx,1); p.important.delete(ci); render(); };
-        tag.appendChild(textBtn);
-        tag.appendChild(removeBtn);
-        tagsWrap.appendChild(tag);
-      });
-      card.appendChild(tagsWrap);
-    }
-
-    // general custom item input
-    const customRow = document.createElement('div');
-    customRow.className = 'custom-item-row';
-    const customInput = document.createElement('input');
-    customInput.placeholder = '其他自訂臨時任務...';
-    const customBtn = document.createElement('button');
-    customBtn.textContent = '加入';
-    const addCustom = ()=>{
-      const v = customInput.value.trim();
-      if(v){ p.customItems.push(v); customInput.value=''; render(); }
-    };
-    customBtn.onclick = addCustom;
-    customInput.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addCustom(); } };
-    customRow.appendChild(customInput);
-    customRow.appendChild(customBtn);
-    card.appendChild(customRow);
-
-    // note
-    const noteWrap = document.createElement('div');
-    noteWrap.className = 'note-wrap';
-    const noteLabel = document.createElement('span');
-    noteLabel.className = 'note-label';
-    noteLabel.textContent = '給 ' + (p.name||'此人員') + ' 的特別注意事項';
-    const noteArea = document.createElement('textarea');
-    noteArea.placeholder = '輸入個人注意事項...';
-    noteArea.value = p.note;
-    noteArea.oninput = (e)=>{ p.note = e.target.value; };
-    noteWrap.appendChild(noteLabel);
-    noteWrap.appendChild(noteArea);
-    card.appendChild(noteWrap);
-
-    list.appendChild(card);
-  });
-}
-
-function formatItemForOutput(p, label){
-  if(p.amounts && p.amounts[label]){
-    return label + ' ' + p.amounts[label];
-  }
-  return label;
-}
-
-function buildPersonEntries(p){
-  const entries = [];
-  p.checked.forEach(label=>{
-    entries.push({ text: formatItemForOutput(p, label), important: p.important.has(label) });
-  });
-  p.customItems.forEach(ci=>{
-    entries.push({ text: ci, important: p.important.has(ci) });
-  });
-  entries.sort((a,b)=> (b.important?1:0) - (a.important?1:0));
-  return entries;
-}
-
-function buildOutput(){
-  const [y,m,d] = dateInput.value.split('-').map(Number);
-  const dt = new Date(y, m-1, d);
-  const weekdays = ["日","一","二","三","四","五","六"];
-  const dateStr = m+"/"+d+"（週"+weekdays[dt.getDay()]+"）";
-
-  let lines = [];
-  lines.push('📅 ' + dateStr + ' 隔日工作分配');
-  lines.push('—');
-
-  if(people.length===0){
-    lines.push('（尚未分配人員）');
-  }
-
-  people.forEach((p, idx)=>{
-    const entries = buildPersonEntries(p);
-    lines.push('👤 ' + (p.name || '未命名') + (p.role ? '（' + p.role + '）' : ''));
-    if(entries.length===0){
-      lines.push('　（無指派項目）');
-    } else {
-      entries.forEach(e=> lines.push((e.important ? '🔴❗' : '☑️') + ' ' + e.text));
-    }
-    if(p.note && p.note.trim()){
-      lines.push('📝 備註：' + p.note.trim());
-    }
-    if(idx < people.length-1) lines.push('—');
-  });
-
-  const g = document.getElementById('globalNote').value.trim();
-  if(g){
-    lines.push('—');
-    lines.push('📌 整體注意事項：' + g);
-  }
-
-  lines.push('—');
-  lines.push('填表人：' + (document.getElementById('fillerName').value.trim() || ''));
-
-  return lines.join('\n');
-}
-
-document.getElementById('previewBtn').onclick = ()=>{
-  document.getElementById('previewText').textContent = buildOutput();
-  document.getElementById('modalBg').classList.add('show');
-};
-document.getElementById('modalClose').onclick = ()=>{
-  document.getElementById('modalBg').classList.remove('show');
-};
-document.getElementById('modalBg').onclick = (e)=>{
-  if(e.target.id==='modalBg') document.getElementById('modalBg').classList.remove('show');
-};
-
-async function saveHistoryEntry(){
-  const dateVal = dateInput.value;
-  const text = buildOutput();
-  let history = await loadJSON('loben-history', []);
-  if(!Array.isArray(history)) history = [];
-  history = history.filter(h=>h.date !== dateVal);
-  history.unshift({date: dateVal, text: text, savedAt: Date.now()});
-  if(history.length>60) history = history.slice(0,60);
-  await saveJSON('loben-history', history);
-}
-
-document.getElementById('copyBtn').onclick = async ()=>{
-  const text = buildOutput();
-  const btn = document.getElementById('copyBtn');
-  let ok = false;
-  try{
-    await navigator.clipboard.writeText(text);
-    ok = true;
-  }catch(err){
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position='fixed'; ta.style.left='-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try{
-      document.execCommand('copy');
-      ok = true;
-    }catch(e2){
-      alert('複製失敗，請手動選取文字複製');
-    }
-    document.body.removeChild(ta);
-  }
-  if(ok){
-    copiedFeedback(btn);
-    saveHistoryEntry();
-  }
-};
-
-function copiedFeedback(btn){
-  const original = btn.textContent;
-  btn.textContent = '✅ 已複製！';
-  btn.classList.add('copied');
-  setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1800);
-}
-
-// ---- clear data ----
-document.getElementById('clearBtn').onclick = ()=>{
-  if(!confirm('確定要清除目前所有已分配的人員與注意事項嗎？此動作無法復原。')) return;
-  people = [];
-  idCounter = 0;
-  document.getElementById('globalNote').value = '';
-  dateInput.value = toISO(defaultTomorrow());
-  updateDateBadge();
-  render();
-};
-
-// ---- history ----
-async function openHistory(){
-  const history = await loadJSON('loben-history', []);
-  const wrap = document.getElementById('historyListWrap');
-  wrap.innerHTML = '';
-  document.getElementById('historyDetailWrap').style.display = 'none';
-  wrap.style.display = 'block';
-  if(!history.length){
-    wrap.innerHTML = '<div class="history-empty">還沒有歷史記錄，複製過的內容會自動存在這裡</div>';
-  } else {
-    history.forEach(h=>{
-      const btn = document.createElement('button');
-      btn.className = 'history-item';
-      const [y,m,d] = h.date.split('-').map(Number);
-      const dt = new Date(y,m-1,d);
-      const weekdays = ["日","一","二","三","四","五","六"];
-      btn.innerHTML = '<span class="hdate">'+m+'/'+d+'（週'+weekdays[dt.getDay()]+'）</span>點擊查看內容';
-      btn.onclick = ()=> showHistoryDetail(h);
-      wrap.appendChild(btn);
-    });
-  }
-  document.getElementById('historyModalBg').classList.add('show');
-}
-
-function showHistoryDetail(h){
-  document.getElementById('historyListWrap').style.display = 'none';
-  const detailWrap = document.getElementById('historyDetailWrap');
-  detailWrap.style.display = 'block';
-  document.getElementById('historyDetailText').textContent = h.text;
-  document.getElementById('historyCopyBtn').onclick = async ()=>{
-    try{ await navigator.clipboard.writeText(h.text); }
-    catch(e){
-      const ta=document.createElement('textarea'); ta.value=h.text; ta.style.position='fixed'; ta.style.left='-9999px';
-      document.body.appendChild(ta); ta.select();
-      try{document.execCommand('copy');}catch(e2){}
-      document.body.removeChild(ta);
-    }
-    const cbtn = document.getElementById('historyCopyBtn');
-    const orig = cbtn.textContent; cbtn.textContent='✅ 已複製'; setTimeout(()=>cbtn.textContent=orig,1500);
-  };
-}
-
-document.getElementById('historyBtn').onclick = openHistory;
-document.getElementById('historyBackBtn').onclick = ()=>{
-  document.getElementById('historyDetailWrap').style.display='none';
-  document.getElementById('historyListWrap').style.display='block';
-};
-document.getElementById('historyCloseBtn').onclick = ()=> document.getElementById('historyModalBg').classList.remove('show');
-document.getElementById('historyModalBg').onclick = (e)=>{ if(e.target.id==='historyModalBg') document.getElementById('historyModalBg').classList.remove('show'); };
-
-render();
 </script>
 </body>
 </html>
