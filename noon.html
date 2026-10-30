@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#2B2420">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="午班待辦">
+<title>羅本家｜午班待辦</title>
+<style>
+  :root{
+    --char:#2B2420; --cream:#FBF5E9; --paper:#FFFFFF; --line:#E8DDC8;
+    --curry:#C97C2C; --curry-d:#A5621B; --herb:#5C7A4A; --alert:#B8452F; --muted:#8A7F6E;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{
+    background:var(--cream); color:var(--char);
+    font:16px/1.45 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+    padding-bottom:calc(92px + env(safe-area-inset-bottom));
+  }
+  button{font:inherit; color:inherit; border:0; background:none; padding:0; cursor:pointer;}
+  button:focus-visible,input:focus-visible{outline:3px solid var(--curry); outline-offset:2px;}
+  .hidden{display:none !important;}
+
+  /* ── 頂部：倒數時鐘是整頁唯一的視覺重點，整條顏色隨時間狀態改變 ── */
+  .hdr{
+    background:var(--char); color:var(--cream);
+    padding:calc(10px + env(safe-area-inset-top)) 16px 14px;
+    position:sticky; top:0; z-index:5; transition:background .4s;
+  }
+  .hdr.state-warn{background:#5E3F18;}
+  .hdr.state-urgent{background:var(--curry-d);}
+  .hdr.state-late{background:var(--alert);}
+  .hdr.state-done{background:var(--herb);}
+  .hdr-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .hdr-title{font-size:17px; font-weight:700;}
+  .me-chip{
+    background:rgba(255,255,255,.16); border-radius:18px; padding:7px 13px;
+    font-size:14px; font-weight:700; min-height:36px;
+  }
+  .datebar{display:flex; align-items:center; gap:4px; margin-top:4px;}
+  .datebar .nav{width:40px; height:36px; font-size:22px; border-radius:10px; opacity:.85;}
+  .datebar .nav:active{background:rgba(255,255,255,.14);}
+  .datelabel{font-size:15px; font-weight:600; min-width:150px; text-align:center;}
+  .datelabel small{font-weight:500; opacity:.8; margin-left:6px;}
+  .clock-big{
+    font-size:46px; line-height:1.1; font-weight:800; margin-top:6px;
+    font-variant-numeric:tabular-nums; letter-spacing:.5px;
+  }
+  .clock-sub{font-size:15px; opacity:.92; margin-top:2px;}
+  .bar{height:8px; background:rgba(255,255,255,.22); border-radius:4px; margin-top:12px; overflow:hidden;}
+  .bar i{display:block; height:100%; width:0; background:var(--cream); border-radius:4px; transition:width .35s;}
+  .hdr-foot{display:flex; justify-content:space-between; font-size:13px; margin-top:6px; opacity:.9;}
+  .hdr-foot .bad{color:#FFD9CF; font-weight:700; opacity:1;}
+
+  /* ── 清單：整列式，不做成一張張卡片 ── */
+  .group-head{
+    display:flex; align-items:baseline; gap:8px; padding:20px 16px 8px;
+    font-size:15px; font-weight:800;
+  }
+  .group-head .count{
+    font-size:13px; background:var(--char); color:var(--cream); border-radius:10px; padding:0 8px; font-weight:700;
+  }
+  .group-head .hint{font-size:13px; font-weight:500; color:var(--muted);}
+  .g-unclaimed .group-head{color:var(--curry-d);}
+  .g-unclaimed .group-head .count{background:var(--curry);}
+  .rows{border-top:1px solid var(--line);}
+  .task{
+    display:flex; align-items:center; gap:12px; min-height:68px;
+    padding:10px 12px 10px 11px; background:var(--paper);
+    border-bottom:1px solid var(--line); border-left:5px solid transparent;
+  }
+  .task.unclaimed{border-left-color:var(--curry);}
+  .task.imp{border-left-color:var(--alert);}
+  .chk{
+    width:46px; height:46px; flex:none; border-radius:50%; border:2.5px solid #CDBFA3;
+    background:#fff; display:grid; place-items:center; color:transparent;
+  }
+  .chk svg{width:24px; height:24px;}
+  .task.done .chk{background:var(--herb); border-color:var(--herb); color:#fff;}
+  .tmain{flex:1; min-width:0; text-align:left; min-height:46px; display:flex; flex-direction:column; justify-content:center;}
+  .tname{font-size:17px; font-weight:600; word-break:break-word;}
+  .task.done .tname{color:var(--muted); text-decoration:line-through; font-weight:500;}
+  .tmeta{font-size:13px; color:var(--muted); margin-top:1px;}
+  .flag{color:var(--alert); font-weight:800;}
+  .tag{display:inline-block; font-size:12px; border:1px solid var(--line); border-radius:10px; padding:0 7px; margin-right:6px; color:var(--muted); background:var(--cream);}
+  .claim{background:var(--curry); color:#fff; font-weight:800; height:46px; padding:0 16px; border-radius:23px; flex:none;}
+  .claim.plain{background:var(--char);}
+  .more{width:40px; height:46px; flex:none; font-size:20px; color:var(--muted);}
+  .done-toggle{width:100%; text-align:left;}
+  .chev{margin-left:auto; color:var(--muted); font-size:13px; font-weight:500;}
+  .empty{padding:48px 28px; text-align:center; color:var(--muted); font-size:15px; line-height:1.7;}
+  .empty b{color:var(--char);}
+
+  .fab{
+    position:fixed; left:16px; right:16px; bottom:calc(14px + env(safe-area-inset-bottom));
+    height:56px; border-radius:16px; background:var(--char); color:var(--cream);
+    font-size:17px; font-weight:800; box-shadow:0 4px 14px rgba(43,36,32,.28); z-index:6;
+  }
+  .btn{background:var(--curry); color:#fff; font-weight:800; border-radius:14px; height:50px; padding:0 22px;}
+
+  /* ── 底部面板 ── */
+  .sheet-bg{position:fixed; inset:0; background:rgba(43,36,32,.5); z-index:20; display:none; align-items:flex-end; justify-content:center;}
+  .sheet-bg.show{display:flex;}
+  .sheet{
+    background:#fff; width:100%; max-width:520px; border-radius:20px 20px 0 0;
+    padding:20px 18px calc(18px + env(safe-area-inset-bottom)); max-height:88vh; overflow-y:auto;
+  }
+  .sheet h3{margin:0 0 14px; font-size:19px; line-height:1.3; word-break:break-word;}
+  .lbl{font-size:13px; color:var(--muted); font-weight:700; margin:14px 0 8px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .opt{
+    min-height:48px; padding:0 18px; border-radius:24px; border:2px solid var(--line);
+    background:#fff; font-weight:700; font-size:16px;
+  }
+  .opt.on{background:var(--char); color:var(--cream); border-color:var(--char);}
+  .opt.big{width:100%; text-align:left; border-radius:14px; padding:0 18px; margin-bottom:10px; min-height:58px; font-size:18px;}
+  .field{
+    width:100%; height:52px; border:2px solid var(--line); border-radius:12px; padding:0 14px;
+    font-size:17px; background:#FBFAF6;
+  }
+  .check{display:flex; align-items:center; gap:12px; min-height:48px; font-size:16px; font-weight:600;}
+  .check input{width:24px; height:24px; accent-color:var(--curry);}
+  .row-btn{width:100%; text-align:left; min-height:52px; padding:0 4px; font-size:16px; font-weight:700; border-top:1px solid var(--line); margin-top:6px;}
+  .row-btn.danger{color:var(--alert);}
+  .sheet .btn{width:100%; margin-top:16px;}
+  .sheet .ghost{width:100%; height:48px; margin-top:8px; color:var(--muted); font-weight:700;}
+  .err{color:var(--alert); font-size:14px; min-height:20px; margin:8px 0 0;}
+
+  .setup{position:fixed; inset:0; background:var(--cream); z-index:30; padding:calc(40px + env(safe-area-inset-top)) 24px 24px;}
+  .setup h2{margin:0 0 8px; font-size:24px;}
+  .setup p{color:var(--muted); line-height:1.7; margin:0 0 16px;}
+  .setup .btn{width:100%; margin-top:14px;}
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(86px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+    background:var(--char); color:#fff; padding:11px 20px; border-radius:22px; font-size:15px;
+    z-index:40; opacity:0; transition:opacity .25s; pointer-events:none; max-width:88vw; text-align:center;
+  }
+  .toast.show{opacity:1;}
+  @media (prefers-reduced-motion:reduce){ .hdr,.bar i,.toast{transition:none;} }
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-top">
+    <div class="hdr-title">🍳 午班待辦</div>
+    <button class="me-chip" id="meBtn">選擇我是誰</button>
+  </div>
+  <div class="datebar">
+    <button class="nav" id="prevDay" aria-label="前一天">‹</button>
+    <div class="datelabel" id="dateLabel"></div>
+    <button class="nav" id="nextDay" aria-label="後一天">›</button>
+  </div>
+  <div class="clock-big" id="clockBig">—</div>
+  <div class="clock-sub" id="clockSub"></div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="hdr-foot"><span id="progText"></span><span id="syncText"></span></div>
+</header>
+
+<main id="list"></main>
+<button class="fab" id="addFab">＋ 臨時加項目</button>
+
+<div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"></div></div>
+
+<div class="setup hidden" id="setup">
+  <h2>🍳 午班待辦</h2>
+  <p>第一次使用，請貼上店長給你的後端網址（以 https://script.google.com 開頭、結尾是 /exec）。每支手機只需要設定一次。</p>
+  <input class="field" id="apiInput" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <p class="err" id="apiErr"></p>
+  <button class="btn" id="apiSave">連線</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const LS = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+const K_API = 'noon-api', K_ME = 'noon-me', K_CACHE = 'noon-cache';
+const BOSS = '店長';
+
+// 網址可帶 ?api=後端網址&me=宛廷，店長傳一條連結給員工就設定好了
+const params = new URLSearchParams(location.search);
+if (params.get('api')) LS.set(K_API, params.get('api'));
+let pendingMe = params.get('me') || '';
+if (params.has('api') || params.has('me')) { try { history.replaceState(null, '', location.pathname); } catch(e){} }
+
+const S = { api: LS.get(K_API) || '', me: LS.get(K_ME) || '', date: '', today: '', day: null,
+            offset: 0, seq: 0, inflight: 0, showDone: false, online: true, lastOk: 0 };
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const short = (n) => (n && n.length === 3 ? n.slice(1) : n);
+const serverNow = () => Date.now() + S.offset;
+function tpParts(ms){ const d = new Date(ms + 8*3600e3); return { h: d.getUTCHours(), m: d.getUTCMinutes() }; }
+const hmNow = () => { const p = tpParts(serverNow()); return pad(p.h) + ':' + pad(p.m); };
+function deadlineMs(date, hhmm){
+  const [y,m,d] = date.split('-').map(Number), [h,mi] = hhmm.split(':').map(Number);
+  return Date.UTC(y, m-1, d, h-8, mi);
+}
+function addDays(date, n){
+  const [y,m,d] = date.split('-').map(Number), t = new Date(Date.UTC(y, m-1, d+n));
+  return t.getUTCFullYear() + '-' + pad(t.getUTCMonth()+1) + '-' + pad(t.getUTCDate());
+}
+function dateLabel(date){
+  const [y,m,d] = date.split('-').map(Number), w = '日一二三四五六'[new Date(Date.UTC(y,m-1,d)).getUTCDay()];
+  return m + '/' + d + '（週' + w + '）';
+}
+
+/* ───────── 網路 ───────── */
+async function request(method, payload){
+  let res;
+  if (method === 'GET') {
+    res = await fetch(S.api + (S.api.includes('?') ? '&' : '?') + new URLSearchParams(payload).toString());
+  } else {
+    // text/plain 可避開瀏覽器的 CORS 預檢，Apps Script 才收得到
+    res = await fetch(S.api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+  }
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || '操作失敗');
+  return data;
+}
+
+function apply(d){
+  S.day = d; S.date = d.date; S.today = d.today;
+  S.offset = d.serverNow - Date.now();
+  S.online = true; S.lastOk = Date.now();
+  LS.set(K_CACHE, JSON.stringify(d));
+  if (pendingMe) {
+    const hit = d.staff.find((n) => n === pendingMe || short(n) === pendingMe || n.includes(pendingMe));
+    if (hit) { S.me = hit; LS.set(K_ME, hit); }
+    pendingMe = '';
+  }
+  render();
+}
+
+async function refresh(date){
+  if (!S.api) return;
+  const my = ++S.seq;
+  try {
+    const d = await request('GET', { action: 'getDay', date: date === undefined ? (S.date || '') : date });
+    if (my !== S.seq) return;
+    apply(d);
+    if (!S.me) openMeSheet();
+  } catch (e) {
+    if (my === S.seq) { S.online = false; renderSync(); }
+  }
+}
+
+async function write(action, payload, mutate){
+  if (!S.me) { openMeSheet(() => write(action, payload, mutate)); return; }
+  const snap = JSON.stringify(S.day);
+  if (mutate) { mutate(S.day); render(); }       // 先在畫面上改，手感才不會慢
+  const my = ++S.seq; S.inflight++;
+  try {
+    const d = await request('POST', Object.assign({ action, date: S.date }, payload));
+    if (my === S.seq) apply(d);
+  } catch (e) {
+    toast(e.message || '儲存失敗');
+    S.online = !(e instanceof TypeError);
+    if (mutate) { S.day = JSON.parse(snap); render(); }
+    refresh();
+  } finally { S.inflight--; }
+}
+
+/* ───────── 畫面 ───────── */
+function sortTasks(a){
+  return a.slice().sort((x, y) => (x.important !== y.important) ? (x.important ? -1 : 1) : x.order - y.order);
+}
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+function taskRow(t, kind, meIsStaff){
+  const tags = [];
+  if (t.source === '隔日待辦') tags.push('<span class="tag">昨晚登記</span>');
+  else if (t.source === '臨時') tags.push('<span class="tag">臨時</span>');
+  let meta = tags.join('');
+  if (t.done) meta += esc(short(t.doneBy)) + (t.doneAt ? ' ' + esc(t.doneAt) : '') + ' 完成';
+  else if (t.important) meta += '<span class="flag">重要</span>';
+  let right = '<button class="more" data-act="menu" data-id="' + esc(t.id) + '" aria-label="更多選項">⋯</button>';
+  if (kind === 'unclaimed') {
+    right = meIsStaff
+      ? '<button class="claim" data-act="claim" data-id="' + esc(t.id) + '">我來做</button>'
+      : '<button class="claim plain" data-act="menu" data-id="' + esc(t.id) + '">指派</button>';
+  }
+  return '<div class="task ' + kind + (t.important && !t.done ? ' imp' : '') + (t.done ? ' done' : '') + '">'
+    + '<button class="chk" data-act="done" data-id="' + esc(t.id) + '" aria-label="' + (t.done ? '取消完成' : '標示完成') + '">' + CHECK + '</button>'
+    + '<button class="tmain" data-act="menu" data-id="' + esc(t.id) + '"><span class="tname">' + esc(t.name) + '</span>'
+    + (meta ? '<span class="tmeta">' + meta + '</span>' : '') + '</button>' + right + '</div>';
+}
+function group(title, count, rowsHtml, cls, hint){
+  return '<section class="' + (cls || '') + '"><div class="group-head"><span>' + esc(title) + '</span><span class="count">' + count + '</span>'
+    + (hint ? '<span class="hint">' + esc(hint) + '</span>' : '') + '</div><div class="rows">' + rowsHtml + '</div></section>';
+}
+
+function renderList(){
+  const L = $('#list'), d = S.day;
+  if (!d) {
+    L.innerHTML = S.online ? '<div class="empty">載入中…</div>'
+      : '<div class="empty"><b>連不上伺服器</b><br>請確認店裡的網路，再重新連線<br><br><button class="btn" data-act="retry">重新連線</button></div>';
+    return;
+  }
+  if (!d.tasks.length) {
+    L.innerHTML = '<div class="empty">' + (d.open
+      ? '<b>' + esc(dateLabel(d.date)) + ' 還沒有待辦事項</b><br>固定清單和前一晚登記的備料會自動出現在這裡，<br>也可以點下方「＋ 臨時加項目」。'
+      : '<b>' + esc(dateLabel(d.date)) + ' 是公休日</b><br>如果要上班，點下方「＋ 臨時加項目」就能新增。') + '</div>';
+    return;
+  }
+  const staff = d.staff, meIsStaff = staff.includes(S.me);
+  const open = sortTasks(d.tasks.filter((t) => !t.done));
+  const done = d.tasks.filter((t) => t.done).sort((a, b) => a.order - b.order);
+  const rowsOf = (arr, kind) => arr.map((t) => taskRow(t, kind, meIsStaff)).join('');
+  let html = '';
+  const unclaimed = open.filter((t) => !staff.includes(t.owner));
+  if (unclaimed.length) html += group('還沒人認領', unclaimed.length, rowsOf(unclaimed, 'unclaimed'), 'g-unclaimed', meIsStaff ? '點「我來做」就是你的' : '');
+  if (meIsStaff) {
+    const mine = open.filter((t) => t.owner === S.me);
+    if (mine.length) html += group('我的（' + short(S.me) + '）', mine.length, rowsOf(mine, 'mine'), 'g-mine');
+  }
+  staff.filter((n) => n !== S.me).forEach((n) => {
+    const items = open.filter((t) => t.owner === n);
+    if (items.length) html += group(short(n) + '的', items.length, rowsOf(items, 'other'), 'g-other');
+  });
+  if (!open.length) html += '<div class="empty"><b>全部完成了</b><br>可以休息了</div>';
+  if (done.length) {
+    html += '<section class="g-done"><button class="group-head done-toggle" data-act="toggleDone"><span>已完成</span><span class="count">' + done.length
+      + '</span><span class="chev">' + (S.showDone ? '收起 ▲' : '展開 ▼') + '</span></button>'
+      + (S.showDone ? '<div class="rows">' + rowsOf(done, 'done') + '</div>' : '') + '</section>';
+  }
+  L.innerHTML = html;
+}
+
+function fmtRem(ms){
+  const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h > 0 ? h + ' 小時 ' + pad(m) + ' 分' : pad(m) + ':' + pad(s % 60);
+}
+
+function renderClock(){
+  const hdr = $('#hdr'), d = S.day;
+  $('#meBtn').textContent = S.me ? '👤 ' + (S.me === BOSS ? BOSS : short(S.me)) + ' ▾' : '選擇我是誰';
+  if (!d) { hdr.className = 'hdr'; $('#clockBig').textContent = '—'; $('#clockSub').textContent = ''; $('#progText').textContent = ''; return; }
+  const total = d.tasks.length, doneN = d.tasks.filter((t) => t.done).length, left = total - doneN;
+  const isToday = S.date === S.today, rem = deadlineMs(S.date, d.deadline) - serverNow();
+  let state = 'calm', big, sub;
+  if (total === 0) { state = 'idle'; big = '—'; sub = d.open ? '還沒有待辦事項' : '公休日'; }
+  else if (left === 0) { state = 'done'; big = '全部完成'; sub = '可以休息了'; }
+  else if (!isToday) { state = 'idle'; big = S.date > S.today ? '尚未開始' : '已結束'; sub = '還有 ' + left + ' 項沒做完'; }
+  else if (rem <= 0) { state = 'late'; big = '已過 ' + d.deadline; sub = '還有 ' + left + ' 項沒做完'; }
+  else {
+    state = rem <= 30*60e3 ? 'urgent' : rem <= 60*60e3 ? 'warn' : 'calm';
+    big = fmtRem(rem); sub = '距離 ' + d.deadline + ' 休息，還有 ' + left + ' 項';
+  }
+  hdr.className = 'hdr state-' + state;
+  $('#clockBig').textContent = big; $('#clockSub').textContent = sub;
+  $('#barFill').style.width = (total ? Math.round(doneN / total * 100) : 0) + '%';
+  $('#progText').textContent = total ? doneN + ' / ' + total + ' 完成' : '';
+  $('#dateLabel').innerHTML = esc(dateLabel(S.date)) + (isToday ? '<small>今天</small>' : '');
+}
+
+function renderSync(){
+  const el = $('#syncText');
+  if (!S.online) { el.textContent = '⚠ 連不上，顯示的是舊資料'; el.className = 'bad'; return; }
+  el.className = '';
+  if (!S.lastOk) { el.textContent = '連線中…'; return; }
+  const d = new Date(S.lastOk);
+  el.textContent = '已同步 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function render(){ renderClock(); renderList(); renderSync(); }
+
+/* ───────── 底部面板 ───────── */
+function openSheet(html){ $('#sheet').innerHTML = html; $('#sheetBg').classList.add('show'); return $('#sheet'); }
+function closeSheet(){ $('#sheetBg').classList.remove('show'); $('#sheet').innerHTML = ''; }
+$('#sheetBg').addEventListener('click', (e) => { if (e.target.id === 'sheetBg') closeSheet(); });
+
+function openMeSheet(cb){
+  const staff = (S.day && S.day.staff) || [];
+  const sh = openSheet('<h3>你是誰？</h3>'
+    + staff.map((n) => '<button class="opt big' + (S.me === n ? ' on' : '') + '" data-me="' + esc(n) + '">' + esc(n) + '</button>').join('')
+    + '<button class="opt big' + (S.me === BOSS ? ' on' : '') + '" data-me="' + BOSS + '">店長／其他人</button>'
+    + '<button class="ghost" data-api>更換後端網址</button>');
+  sh.onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.api !== undefined) { closeSheet(); showSetup(); return; }
+    if (b.dataset.me) { S.me = b.dataset.me; LS.set(K_ME, S.me); closeSheet(); render(); if (typeof cb === 'function') cb(); }
+  };
+}
+
+function openTaskSheet(id){
+  const t = S.day && S.day.tasks.find((x) => x.id === id); if (!t) return;
+  const staff = S.day.staff;
+  const sh = openSheet('<h3>' + esc(t.name) + '</h3><div class="lbl">負責人</div><div class="chips">'
+    + staff.map((n) => '<button class="opt' + (t.owner === n ? ' on' : '') + '" data-owner="' + esc(n) + '">' + esc(short(n)) + '</button>').join('')
+    + '<button class="opt' + (!staff.includes(t.owner) ? ' on' : '') + '" data-owner="">未指定</button></div>'
+    + '<button class="row-btn" data-imp>' + (t.important ? '取消「重要」標記' : '❗ 標為重要') + '</button>'
+    + '<button class="row-btn danger" data-del>刪除這一項（只影響這一天）</button>'
+    + '<button class="ghost" data-close>關閉</button>');
+  sh.onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.owner !== undefined) { closeSheet(); setOwner(id, b.dataset.owner); }
+    else if (b.dataset.imp !== undefined) { closeSheet(); setImportant(id, !t.important); }
+    else if (b.dataset.del !== undefined) {
+      if (confirm('確定刪除「' + t.name + '」？')) { closeSheet(); write('removeTask', { id }, (d) => { d.tasks = d.tasks.filter((x) => x.id !== id); }); }
+    } else if (b.dataset.close !== undefined) closeSheet();
+  };
+}
+
+function openAddSheet(){
+  const staff = S.day ? S.day.staff : [], def = staff.includes(S.me) ? S.me : '';
+  const sh = openSheet('<h3>＋ 臨時加項目</h3>'
+    + '<input class="field" id="addName" maxlength="60" placeholder="例如：包起司豬排" autocomplete="off">'
+    + '<div class="lbl">負責人</div><div class="chips" id="addOwner">'
+    + '<button class="opt' + (def === '' ? ' on' : '') + '" data-owner="">先不指定</button>'
+    + staff.map((n) => '<button class="opt' + (def === n ? ' on' : '') + '" data-owner="' + esc(n) + '">' + esc(short(n)) + '</button>').join('') + '</div>'
+    + '<label class="check"><input type="checkbox" id="addImp"> ❗ 重要</label>'
+    + '<label class="check"><input type="checkbox" id="addFixed"> 📌 存成每天固定要做的項目</label>'
+    + '<button class="btn" id="addGo">加入</button><button class="ghost" data-close>取消</button>');
+  let owner = def;
+  const name = $('#addName', sh);
+  name.addEventListener('focus', () => setTimeout(() => { try { name.scrollIntoView({ block: 'center' }); } catch(e){} }, 300));
+  const submit = () => {
+    const v = name.value.trim();
+    if (!v) { name.focus(); return; }
+    const imp = $('#addImp', sh).checked, fixed = $('#addFixed', sh).checked;
+    closeSheet();
+    write('addTask', { name: v, owner, important: imp, saveFixed: fixed, by: S.me }, (d) => {
+      d.tasks.push({ id: 'tmp' + Date.now(), name: v, source: '臨時', pusher: S.me, owner, important: imp, done: false,
+                     doneBy: '', doneAt: '', order: d.tasks.reduce((m, x) => Math.max(m, x.order), 0) + 1 });
+    });
+  };
+  sh.onclick = (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.owner !== undefined) { owner = b.dataset.owner; sh.querySelectorAll('#addOwner .opt').forEach((x) => x.classList.toggle('on', x === b)); }
+    else if (b.id === 'addGo') submit();
+    else if (b.dataset.close !== undefined) closeSheet();
+  };
+  name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  setTimeout(() => name.focus(), 50);
+}
+
+/* ───────── 動作 ───────── */
+const findTask = (id) => S.day && S.day.tasks.find((x) => x.id === id);
+function toggleDone(id){
+  const t = findTask(id); if (!t) return;
+  const next = !t.done;
+  write('setDone', { id, done: next, by: S.me }, (d) => {
+    const x = d.tasks.find((y) => y.id === id);
+    x.done = next; x.doneBy = next ? S.me : ''; x.doneAt = next ? hmNow() : '';
+    if (next && !x.owner && d.staff.includes(S.me)) x.owner = S.me;
+  });
+  try { if (navigator.vibrate) navigator.vibrate(12); } catch(e){}
+}
+function setOwner(id, owner){ write('setOwner', { id, owner }, (d) => { d.tasks.find((y) => y.id === id).owner = owner; }); }
+function setImportant(id, imp){ write('setImportant', { id, important: imp }, (d) => { d.tasks.find((y) => y.id === id).important = imp; }); }
+
+$('#list').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, id = b.dataset.id;
+  if (act === 'done') toggleDone(id);
+  else if (act === 'claim') setOwner(id, S.me);
+  else if (act === 'menu') openTaskSheet(id);
+  else if (act === 'toggleDone') { S.showDone = !S.showDone; renderList(); }
+  else if (act === 'retry') refresh();
+});
+$('#addFab').addEventListener('click', () => { if (!S.me) openMeSheet(openAddSheet); else openAddSheet(); });
+$('#meBtn').addEventListener('click', () => openMeSheet());
+function goDate(date){ S.seq++; S.date = date; S.day = null; S.online = true; render(); refresh(date); }
+$('#prevDay').addEventListener('click', () => { if (S.date) goDate(addDays(S.date, -1)); });
+$('#nextDay').addEventListener('click', () => { if (S.date) goDate(addDays(S.date, 1)); });
+
+let toastTimer;
+function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600); }
+
+/* ───────── 第一次設定 ───────── */
+function showSetup(){ $('#setup').classList.remove('hidden'); $('#apiInput').value = S.api; $('#apiErr').textContent = ''; }
+$('#apiSave').addEventListener('click', async () => {
+  const v = $('#apiInput').value.trim(), err = $('#apiErr');
+  if (!/^https:\/\/script\.google\.com\/.+\/exec/.test(v)) { err.textContent = '網址格式不對，要以 https://script.google.com 開頭、/exec 結尾'; return; }
+  err.textContent = '連線測試中…';
+  const old = S.api; S.api = v;
+  try { await request('GET', { action: 'ping' }); }
+  catch (e) { S.api = old; err.textContent = '連不上這個網址，請確認部署時「存取權」選的是「所有人」'; return; }
+  LS.set(K_API, v); $('#setup').classList.add('hidden'); S.day = null; render(); refresh('');
+});
+
+/* ───────── 啟動 ───────── */
+function start(){
+  try { const c = JSON.parse(LS.get(K_CACHE) || 'null'); if (c && c.tasks) { S.day = c; S.date = c.date; S.today = c.today; S.offset = 0; } } catch(e){}
+  render();
+  if (!S.api) { showSetup(); return; }
+  refresh('');
+  setInterval(renderClock, 1000);
+  setInterval(() => { if (!document.hidden && !S.inflight && S.day && !$('#sheetBg').classList.contains('show')) refresh(); }, 7000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !S.inflight) refresh(); });
+}
+start();
+})();
+</script>
+</body>
+</html>
