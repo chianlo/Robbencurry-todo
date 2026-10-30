@@ -336,6 +336,11 @@
     <input type="date" id="overviewDateInput">
     <button class="lock-btn" id="ovMoveBtn" style="background:var(--curry); color:#fff; flex-shrink:0;">📦搬移資料</button>
   </div>
+  <div class="section-title">🍳 午班待辦連線</div>
+  <div class="date-edit-row" style="flex-wrap:wrap;">
+    <input type="url" id="noonApiInput" placeholder="貼上午班待辦的後端網址（/exec 結尾），留空＝不推送" style="flex:1; min-width:200px;" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <button class="lock-btn" id="noonApiSave" style="background:var(--curry); color:#fff; flex-shrink:0;">儲存</button>
+  </div>
   <div class="section-title">👥 人員管理（點選可修改職稱）</div>
   <div id="staffManageList" style="margin:0 4px 4px;"></div>
   <div class="section-title">📋 今日登記狀況</div>
@@ -969,6 +974,40 @@ document.getElementById('entryNote').oninput = (ev)=>{
 document.getElementById('entryBackBtn').onclick = ()=>{
   showScreen('homeScreen'); renderHome();
 };
+// ---- 推送到「午班待辦」小工具 ----
+const NOON_PUSH_CATEGORIES = ["內場備料"];   // 這些分類裡勾選的項目，會變成隔天中午內場的待辦
+let noonApi = '';
+loadJSON('loben-noon-api', '').then(v=>{ noonApi = v || ''; const i=document.getElementById('noonApiInput'); if(i) i.value = noonApi; });
+document.getElementById('noonApiSave').onclick = async ()=>{
+  const v = document.getElementById('noonApiInput').value.trim();
+  if(v && !/^https:\/\/script\.google\.com\/.+\/exec/.test(v)){ showToast('網址格式不對，要以 https://script.google.com 開頭、/exec 結尾'); return; }
+  noonApi = v; await saveJSON('loben-noon-api', v);
+  showToast(v ? '已儲存午班待辦連線 ✅' : '已關閉午班待辦推送');
+};
+function noonPushLabels(){
+  const set = new Set();
+  CATEGORIES.filter(c=>NOON_PUSH_CATEGORIES.includes(c.name)).forEach(c=>{
+    c.items.forEach(it=> set.add(typeof it === 'string' ? it : it.name));
+    (c.extra||[]).forEach(it=> set.add(typeof it === 'string' ? it : it.name));
+  });
+  return set;
+}
+async function pushToNoon(name, e){
+  if(!noonApi) return null;
+  const labels = noonPushLabels();
+  const items = buildEntryLines(e).filter(it=>{
+    const base = it.label;
+    // 勾選的內場備料項目；手動新增的項目只有「內場」人員登記時才推送
+    return labels.has(base) || (e.customItems.includes(base) && /內場/.test(e.role||''));
+  }).map(it=>({name: it.text, important: !!it.important}));
+  try{
+    const res = await fetch(noonApi, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'pushTasks', date: workingDate, pusher: name, source:'隔日待辦', items }) });
+    const j = await res.json();
+    return j.ok ? items.length : false;
+  }catch(err){ return false; }
+}
+
 document.getElementById('entryDoneBtn').onclick = async ()=>{
   const e = dayData.entries[currentPersonName];
   e.submitted = true;
@@ -976,7 +1015,8 @@ document.getElementById('entryDoneBtn').onclick = async ()=>{
   await saveDay();
   const msg = buildPersonMessage(currentPersonName, e);
   const ok = await sendDiscord(msg);
-  showToast(ok ? '已完成登記並通知店長 ✅' : '已完成登記（Discord通知失敗，請確認網路）');
+  const pushed = await pushToNoon(currentPersonName, e);
+  showToast((ok ? '已完成登記並通知店長 ✅' : '已完成登記（Discord通知失敗，請確認網路）') + (pushed === false ? '　⚠️午班待辦同步失敗' : (pushed ? '　已同步 '+pushed+' 項到午班待辦' : '')));
   showScreen('homeScreen'); renderHome();
 };
 
